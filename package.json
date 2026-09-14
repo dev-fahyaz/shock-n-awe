@@ -1,0 +1,41 @@
+{
+  "name": "shock-and-awe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Config-driven interactive scene engine — desk, plan board, office environment — serving securityawarenesstraining.ai and aspiretss.com.",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run prebuild:scenes && next dev",
+    "build": "npm run prebuild:scenes && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint",
+    "prebuild:scenes": "node scripts/reserved-slugs.mjs",
+    "validate:scenes": "node scripts/reserved-slugs.mjs && node scripts/validate-scenes.mjs"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.563.0",
+    "next": "^14.2.35",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "autoprefixer": "^10.4.24",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^15.5.0",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.9.3"
+  }
+}

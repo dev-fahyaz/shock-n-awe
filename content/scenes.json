@@ -1,0 +1,1613 @@
+[
+  {
+    "id": "nyc-financial-desk",
+    "routes": [
+      {
+        "site": "asat",
+        "slug": "nyc-security-desk",
+        "canonical": true,
+        "indexable": true,
+        "status": "live",
+        "publishedAt": "2026-08-30"
+      },
+      {
+        "site": "aspire",
+        "slug": "nyc-desk",
+        "indexable": false,
+        "status": "live"
+      }
+    ],
+    "preset": "desk",
+    "layout": "freeform",
+    "audience": {
+      "nameplate": "Financial Services Security Leaders",
+      "prefix": "Customized for the desk of"
+    },
+    "stage": {
+      "background": {
+        "src": "/scene/stages/walnut-desk.svg",
+        "width": 2400,
+        "height": 1400,
+        "alt": "An executive desk viewed from above, with a monitor, phone, business card, printed letter and several brochures laid out on a leather pad."
+      },
+      "theme": "walnut",
+      "nameplate": {
+        "layout": "freeform",
+        "x": 5,
+        "y": 4,
+        "w": 21,
+        "h": 9
+      }
+    },
+    "chrome": "full",
+    "banner": {
+      "text": "Reduce phishing risk across your workforce in 90 days.",
+      "cta": {
+        "label": "Book a walkthrough",
+        "href": "/request-demo"
+      }
+    },
+    "items": [
+      {
+        "id": "overview-video",
+        "label": "How Aspire trains your people",
+        "hint": "Watch the overview",
+        "kind": "video",
+        "src": "/scene/shared/video/overview.mp4",
+        "poster": "/scene/shared/video/overview-poster.webp",
+        "autoplayMuted": true,
+        "captions": [
+          {
+            "src": "/scene/shared/video/overview.en.vtt",
+            "srclang": "en",
+            "label": "English"
+          }
+        ],
+        "placement": {
+          "layout": "freeform",
+          "x": 34,
+          "y": 5,
+          "w": 30,
+          "h": 37
+        }
+      },
+      {
+        "id": "ceo-card",
+        "label": "Adam Tanjil — CEO & Chairman",
+        "hint": "View the business card",
+        "kind": "card",
+        "person": {
+          "name": "Adam Tanjil",
+          "title": "CEO & Chairman",
+          "photo": "/scene/shared/adam.jpg",
+          "email": "tanjil@aspiretss.com",
+          "phones": [
+            {
+              "label": "USA",
+              "number": "+1 (917) 600-9233"
+            },
+            {
+              "label": "BD",
+              "number": "+88 01711 506834"
+            }
+          ],
+          "address": "11 Broadway, New York, NY 10004, USA",
+          "website": "https://aspiretss.com"
+        },
+        "social": [
+          {
+            "network": "linkedin",
+            "href": "https://www.linkedin.com/company/aspire-tech-services-and-solution-limited"
+          },
+          {
+            "network": "facebook",
+            "href": "https://www.facebook.com/aspiretss"
+          },
+          {
+            "network": "twitter",
+            "href": "https://twitter.com/AspireTechServ3"
+          }
+        ],
+        "vcard": "/api/scene/vcard/ceo-card",
+        "placement": {
+          "layout": "freeform",
+          "x": 71.5,
+          "y": 7,
+          "w": 17,
+          "h": 13,
+          "rotate": -3
+        }
+      },
+      {
+        "id": "voice-note",
+        "label": "A message from the team",
+        "hint": "Listen to the message",
+        "kind": "audio",
+        "src": "/scene/shared/audio/message.m4a",
+        "transcript": "True, this is a message from us.",
+        "placement": {
+          "layout": "freeform",
+          "x": 7.5,
+          "y": 17,
+          "w": 10,
+          "h": 29,
+          "rotate": 4
+        }
+      },
+      {
+        "id": "training-programme",
+        "label": "Cybersecurity Certification Programme",
+        "hint": "Browse the programme",
+        "kind": "embed",
+        "src": "https://aspiretss.com/cybersecurity-certification-new-york",
+        "sandbox": "allow-scripts allow-same-origin allow-forms allow-popups",
+        "placement": {
+          "layout": "freeform",
+          "x": 66,
+          "y": 25,
+          "w": 19,
+          "h": 34,
+          "rotate": 5
+        }
+      },
+      {
+        "id": "nyc-letter",
+        "label": "A note from Adam Tanjil",
+        "hint": "Read the letter",
+        "kind": "letter",
+        "bodyMdx": "Dear {{firstName}},\n\nNinety per cent of the breaches we are called into started with one person clicking one thing. Not a firewall gap. A Tuesday morning and a convincing email.\n\nThat is the part most security budgets underfund, and it is the part we fix. Aspire runs continuous, role-aware awareness training with phishing simulations built from the lures actually circulating in your sector — not last year’s generic templates.\n\nEverything on this desk is yours. The handbook covers the threat landscape as it stands today. The 21 questions are the ones I would ask any vendor, including us.\n\nIf you would rather just talk, my direct line is on the card.",
+        "letterheadSrc": "/scene/shared/letterhead-aspire.svg",
+        "signature": {
+          "name": "Adam Tanjil",
+          "title": "CEO & Chairman, Aspire Tech"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 33,
+          "y": 47,
+          "w": 23,
+          "h": 45,
+          "rotate": -2
+        }
+      },
+      {
+        "id": "buyers-guide",
+        "label": "The Business Owners' Guide to I.T. Support Services and Fees",
+        "hint": "Read the buyer’s guide",
+        "download": {
+          "href": "/scene/shared/docs/it-buyers-guide.pdf",
+          "sizeLabel": "1.1 KB"
+        },
+        "kind": "pdf",
+        "src": "/scene/shared/docs/it-buyers-guide.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 5.5,
+          "y": 51,
+          "w": 19,
+          "h": 33,
+          "rotate": -6
+        }
+      },
+      {
+        "id": "handbook",
+        "label": "Cyber Security Awareness Handbook",
+        "hint": "Read the handbook",
+        "download": {
+          "href": "/scene/shared/docs/handbook.pdf",
+          "filename": "Aspire-Cyber-Security-Awareness-Handbook.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "pdf",
+        "src": "/scene/shared/docs/handbook.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 60,
+          "y": 64,
+          "w": 12,
+          "h": 25
+        }
+      },
+      {
+        "id": "soc-brochure",
+        "label": "Aspire Security Operations Center (A-SOC)",
+        "hint": "Read the SOC-as-a-Service brochure",
+        "download": {
+          "href": "/scene/shared/docs/a-soc-brochure.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "pdf",
+        "src": "/scene/shared/docs/a-soc-brochure.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 73.5,
+          "y": 64,
+          "w": 12,
+          "h": 25
+        }
+      },
+      {
+        "id": "critical-questions",
+        "label": "21 Critical I.T. Security Questions",
+        "hint": "Read the education guide",
+        "download": {
+          "href": "/scene/shared/docs/21-critical-questions.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "pdf",
+        "src": "/scene/shared/docs/21-critical-questions.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 87,
+          "y": 64,
+          "w": 11,
+          "h": 25
+        }
+      }
+    ],
+    "seo": {
+      "title": "Security Awareness Training for New York Financial Services",
+      "description": "A working desk of resources for financial-services security leaders: the awareness handbook, 21 vendor questions, SOC-as-a-Service and the NYC certification programme.",
+      "ogImage": "/scene/stages/walnut-desk-og.png",
+      "schema": "CollectionPage"
+    },
+    "tracking": {
+      "campaign": "nyc-financial-2026",
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "ciso-table",
+    "routes": [
+      {
+        "site": "asat",
+        "slug": "security-awareness-month",
+        "canonical": true,
+        "indexable": true,
+        "status": "live",
+        "publishedAt": "2026-08-30"
+      }
+    ],
+    "parent": "campaign-planner",
+    "preset": "desk",
+    "layout": "freeform",
+    "audience": {
+      "nameplate": "Security Awareness Month Planners",
+      "prefix": "Prepared for"
+    },
+    "stage": {
+      "background": {
+        "src": "/scene/stages/ciso-table.webp",
+        "width": 1536,
+        "height": 1024,
+        "alt": "A security leader’s desk laid out for Security Awareness Month: a CISO nameplate, campaign strategy notebook, poster bundle on a tablet, a toolkit guide, communication plan, video concepts and a measurement clipboard."
+      },
+      "theme": "dark"
+    },
+    "chrome": "full",
+    "banner": {
+      "text": "Everything you need to plan, promote and measure Awareness Month.",
+      "cta": {
+        "label": "Get the toolkit",
+        "href": "/request-demo"
+      }
+    },
+    "items": [
+      {
+        "id": "ciso-card",
+        "label": "Your programme lead",
+        "hint": "View contact details",
+        "kind": "card",
+        "person": {
+          "name": "Adam Tanjil",
+          "title": "CEO & Chairman, Aspire Tech",
+          "photo": "/scene/shared/adam.jpg",
+          "email": "tanjil@aspiretss.com",
+          "phones": [
+            {
+              "label": "USA",
+              "number": "+1 (917) 600-9233"
+            }
+          ],
+          "address": "11 Broadway, New York, NY 10004, USA",
+          "website": "https://www.securityawarenesstraining.ai"
+        },
+        "social": [
+          {
+            "network": "linkedin",
+            "href": "https://www.linkedin.com/company/aspire-tech-security-awareness-training"
+          }
+        ],
+        "vcard": "/api/scene/vcard/ciso-card",
+        "placement": {
+          "layout": "freeform",
+          "x": 2.3505272916203293,
+          "y": 1.6278091185870656,
+          "w": 19.7,
+          "h": 8.6,
+          "rotate": -7
+        }
+      },
+      {
+        "id": "at-a-glance",
+        "label": "Awareness Month at a glance",
+        "hint": "The four-week plan",
+        "download": {
+          "href": "/scene/shared/docs/awareness-month-at-a-glance.pdf",
+          "filename": "Awareness-Month-At-A-Glance.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/awareness-month-at-a-glance.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 68.86122734096975,
+          "y": 6.45295015222886,
+          "w": 19.5,
+          "h": 31.5,
+          "rotate": 5
+        }
+      },
+      {
+        "id": "programme-overview",
+        "label": "Cybersecurity Awareness Month 2026",
+        "hint": "Open the programme page",
+        "kind": "link",
+        "href": "https://securityawarenesstraining.ai/",
+        "placement": {
+          "layout": "freeform",
+          "x": 91.1,
+          "y": 10.3,
+          "w": 7.8,
+          "h": 26.9
+        }
+      },
+      {
+        "id": "campaign-strategy",
+        "label": "Campaign strategy",
+        "hint": "Build awareness, change behaviour, reduce risk",
+        "download": {
+          "href": "/scene/shared/docs/campaign-strategy.pdf",
+          "sizeLabel": "1.1 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/campaign-strategy.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 26.25764255727313,
+          "y": 16.972194961303057,
+          "w": 22.3,
+          "h": 23.6
+        }
+      },
+      {
+        "id": "key-message",
+        "label": "The key message",
+        "hint": "Read the note",
+        "kind": "letter",
+        "bodyMdx": "{{firstName}},\n\nSmall actions today, big impact tomorrow.\n\nThat is the whole campaign in one line. Every poster, every email and every sixty-second video below is built to land the same idea from a different angle — because a message people meet once is a message people forget.\n\nConsistent message, multiple touchpoints, measurable impact.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 49,
+          "y": 18.1,
+          "w": 6.9,
+          "h": 12.7
+        }
+      },
+      {
+        "id": "themes",
+        "label": "The five campaign themes",
+        "hint": "Think before you click, protect your data, and three more",
+        "kind": "auto",
+        "src": "/scene/shared/docs/campaign-themes.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 56.1,
+          "y": 17.4,
+          "w": 9.8,
+          "h": 24.8,
+          "rotate": 4
+        }
+      },
+      {
+        "id": "poster-see-say",
+        "label": "Poster — See Something, Say Something",
+        "hint": "View the poster",
+        "kind": "auto",
+        "src": "/scene/shared/posters/see-something-say-something.png",
+        "placement": {
+          "layout": "freeform",
+          "x": 3.2387835193783365,
+          "y": 28.397335994944854,
+          "w": 12.8,
+          "h": 23,
+          "rotate": -6
+        }
+      },
+      {
+        "id": "poster-mfa",
+        "label": "Poster — MFA: easy, fast, essential",
+        "hint": "View the poster",
+        "kind": "auto",
+        "src": "/scene/shared/posters/mfa.png",
+        "placement": {
+          "layout": "freeform",
+          "x": 1.9423574427268684,
+          "y": 53.2834273557612,
+          "w": 13.3,
+          "h": 15.6,
+          "rotate": -7
+        }
+      },
+      {
+        "id": "poster-bundle",
+        "label": "Security Awareness Month poster bundle",
+        "hint": "Download all posters",
+        "download": {
+          "href": "/scene/shared/downloads/awareness-month-poster-bundle.zip",
+          "filename": "Awareness-Month-Poster-Bundle.zip"
+        },
+        "kind": "download",
+        "placement": {
+          "layout": "freeform",
+          "x": 19.2,
+          "y": 40.8,
+          "w": 21,
+          "h": 33.6,
+          "rotate": -2
+        }
+      },
+      {
+        "id": "checklist",
+        "label": "Launch checklist",
+        "hint": "Leadership note, rewards, feedback loop, metrics",
+        "kind": "auto",
+        "src": "/scene/shared/docs/launch-checklist.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 40.976512455516016,
+          "y": 44.03048944320271,
+          "w": 7.2,
+          "h": 17.5
+        }
+      },
+      {
+        "id": "poster-preview",
+        "label": "Poster bundle — sneak peek",
+        "hint": "Preview four of the posters",
+        "kind": "auto",
+        "src": "/scene/shared/posters/bundle-sneak-peek.png",
+        "placement": {
+          "layout": "freeform",
+          "x": 49.8,
+          "y": 42.99731967538436,
+          "w": 17.4,
+          "h": 32.5,
+          "rotate": 4
+        }
+      },
+      {
+        "id": "toolkit-guide",
+        "label": "Security Awareness Toolkit Guide",
+        "hint": "Overview, key messages, resources, activities, templates, FAQs",
+        "download": {
+          "href": "/scene/shared/docs/security-awareness-toolkit-guide.pdf",
+          "filename": "Security-Awareness-Toolkit-Guide.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/security-awareness-toolkit-guide.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 67.8,
+          "y": 39.8,
+          "w": 26,
+          "h": 38.3
+        }
+      },
+      {
+        "id": "campaign-overview",
+        "label": "Security Awareness Month — Secure today, stronger tomorrow",
+        "hint": "Plan. Educate. Empower.",
+        "kind": "auto",
+        "src": "/scene/shared/docs/awareness-month-overview.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 31.3,
+          "y": 2.4,
+          "w": 37.1,
+          "h": 14.2
+        }
+      },
+      {
+        "id": "sticky-everyone",
+        "label": "Everyone. Everywhere. Every day.",
+        "hint": "Who this campaign is for",
+        "kind": "letter",
+        "bodyMdx": "Everyone. Everywhere. Every day.\n\nAwareness training fails when it is aimed at \"users\" — a group nobody believes they belong to. It works when the finance team, the board and the night shift each see themselves in it.\n\nThat is why the audience row on the plan names five different groups rather than one.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 85.86940805021129,
+          "y": 4.4,
+          "w": 7.5,
+          "h": 11.7,
+          "rotate": -13
+        }
+      },
+      {
+        "id": "sticky-behaviour",
+        "label": "Behaviour change is our goal",
+        "hint": "Not completion rates",
+        "kind": "letter",
+        "bodyMdx": "Behaviour change is our goal.\n\nCompletion rate measures whether people clicked through a module. It is the easiest number to move and the least useful one to report.\n\nPhishing report rate is the number that matters: it only rises when somebody notices something, decides it is worth flagging, and trusts that flagging it will not make them look foolish. All three of those are culture, not training.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 15.954090354620774,
+          "y": 30.239037433155083,
+          "w": 6.9,
+          "h": 9.8,
+          "rotate": -8
+        }
+      },
+      {
+        "id": "sticky-one-toolkit",
+        "label": "One toolkit. Many possibilities.",
+        "hint": "See the twelve-week campaign plan",
+        "kind": "scene",
+        "targetId": "campaign-planner",
+        "transition": "zoom",
+        "placement": {
+          "layout": "freeform",
+          "x": 82.8,
+          "y": 66.2,
+          "w": 6.5,
+          "h": 9.8
+        }
+      },
+      {
+        "id": "comms-plan",
+        "label": "Communication plan",
+        "hint": "Email, intranet, signage, Teams, talking points, social",
+        "kind": "auto",
+        "src": "/scene/shared/docs/communication-plan.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 3.4316791140736207,
+          "y": 73.56951055679728,
+          "w": 13.2,
+          "h": 19.5,
+          "rotate": -9
+        }
+      },
+      {
+        "id": "video-concepts",
+        "label": "Video concepts — 60 seconds each",
+        "hint": "Phishing, data protection, password security",
+        "kind": "auto",
+        "src": "/scene/shared/video/awareness-month-concepts.mp4",
+        "poster": "/scene/shared/video/awareness-month-concepts-poster.jpg",
+        "placement": {
+          "layout": "freeform",
+          "x": 14.796447797347643,
+          "y": 78.49731151560411,
+          "w": 19.5,
+          "h": 19
+        }
+      },
+      {
+        "id": "ideas-in-progress",
+        "label": "Ideas in progress",
+        "hint": "What we are working on next",
+        "kind": "letter",
+        "bodyMdx": "Ideas in progress\n\n· Interactive quiz\n· Department challenges\n· Security champions\n· Storytelling series\n· \"Day in the life\" videos\n\nMake security relatable. Make it stick. Make it part of our culture.\n\nNone of these are new ideas. What makes them work is running them together, on a schedule people can predict, with the same message underneath each one.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 37.16939718986322,
+          "y": 77.94169327842998,
+          "w": 10,
+          "h": 19.8,
+          "rotate": 4
+        }
+      },
+      {
+        "id": "priorities",
+        "label": "Top priorities",
+        "hint": "Engage, reduce risk, measure, build culture",
+        "kind": "auto",
+        "src": "/scene/shared/docs/top-priorities.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 63.015306835242434,
+          "y": 78.5139167989639,
+          "w": 10.4,
+          "h": 18.6
+        }
+      },
+      {
+        "id": "measure-success",
+        "label": "How we measure success",
+        "hint": "Participation, completion, report rate, behaviour change",
+        "kind": "auto",
+        "src": "/scene/shared/docs/measure-success.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 74.1,
+          "y": 77,
+          "w": 13,
+          "h": 21.9
+        }
+      },
+      {
+        "id": "cta-aware-prepare-protect",
+        "label": "Aware. Prepare. Protect. — start your programme",
+        "hint": "Book a walkthrough",
+        "kind": "link",
+        "href": "/request-demo",
+        "placement": {
+          "layout": "freeform",
+          "x": 91.84235744272686,
+          "y": 82.8497342522769,
+          "w": 7.8,
+          "h": 16.5
+        }
+      }
+    ],
+    "seo": {
+      "title": "Security Awareness Month toolkit for security leaders",
+      "description": "A complete Awareness Month campaign in one place: strategy, themes, poster bundle, communication plan, video concepts and the metrics that prove it worked.",
+      "ogImage": "/scene/stages/ciso-table-og.jpg",
+      "schema": "CollectionPage"
+    },
+    "tracking": {
+      "campaign": "awareness-month-2026",
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "campaign-planner",
+    "routes": [
+      {
+        "site": "asat",
+        "slug": "campaign-planner",
+        "canonical": true,
+        "indexable": true,
+        "status": "live",
+        "publishedAt": "2026-08-30"
+      }
+    ],
+    "preset": "board",
+    "layout": "freeform",
+    "audience": {
+      "nameplate": "Security Awareness Month",
+      "prefix": "Campaign plan for"
+    },
+    "stage": {
+      "background": {
+        "src": "/scene/stages/campaign-planner.webp",
+        "width": 1536,
+        "height": 1024,
+        "alt": "A framed campaign planning board for Security Awareness Month, laid out as five phases — Plan, Launch, Engage, Reinforce and Measure — across rows for campaign assets, key activities, audience and success metrics, with a timeline along the bottom."
+      },
+      "theme": "light"
+    },
+    "chrome": "full",
+    "banner": {
+      "text": "Twelve weeks, five phases, every asset in one place.",
+      "cta": {
+        "label": "Plan your campaign",
+        "href": "/request-demo"
+      }
+    },
+    "items": [
+      {
+        "id": "brand",
+        "label": "Aspire TSS — Securing Tomorrow, Together",
+        "hint": "Visit the programme",
+        "kind": "link",
+        "href": "https://securityawarenesstraining.ai/",
+        "placement": {
+          "layout": "freeform",
+          "x": 6.5,
+          "y": 5.7,
+          "w": 17,
+          "h": 6.5
+        }
+      },
+      {
+        "id": "campaign-overview",
+        "label": "Security Awareness Month — the whole campaign",
+        "hint": "Plan. Educate. Empower. Protect.",
+        "kind": "auto",
+        "src": "/scene/shared/docs/awareness-month-overview.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 26,
+          "y": 6.1,
+          "w": 44.9,
+          "h": 9.6
+        }
+      },
+      {
+        "id": "campaign-goal",
+        "label": "Our goal",
+        "hint": "Why this campaign exists",
+        "kind": "letter",
+        "bodyMdx": "{{firstName}},\n\nBuild a security-first culture where every employee takes ownership of security, every day.\n\nThat is the goal, and it is deliberately not \"reduce click rate by thirty per cent\". A number moves for a quarter. A culture holds when the campaign ends, which is the only test that matters.\n\nEverything on this board is in service of that one sentence.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 81.3,
+          "y": 5.4,
+          "w": 11.5,
+          "h": 14.6
+        }
+      },
+      {
+        "id": "row-phases",
+        "label": "All five campaign phases",
+        "hint": "The twelve-week arc, end to end",
+        "kind": "auto",
+        "src": "/scene/shared/docs/campaign-phases.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.3,
+          "y": 21.5,
+          "w": 7.5,
+          "h": 7
+        }
+      },
+      {
+        "id": "open-toolkit-desk",
+        "label": "Open the full toolkit",
+        "hint": "Every asset, laid out on the desk",
+        "kind": "scene",
+        "targetId": "ciso-table",
+        "transition": "zoom",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.3,
+          "y": 39,
+          "w": 7.5,
+          "h": 6.5
+        }
+      },
+      {
+        "id": "row-activities",
+        "label": "Key activities across every phase",
+        "hint": "What the team actually does, week by week",
+        "kind": "auto",
+        "src": "/scene/shared/docs/key-activities.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.3,
+          "y": 51.6,
+          "w": 7.5,
+          "h": 5.5
+        }
+      },
+      {
+        "id": "row-audience",
+        "label": "Audience map",
+        "hint": "Who each phase is aimed at",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-map.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.3,
+          "y": 64.9,
+          "w": 7.5,
+          "h": 4
+        }
+      },
+      {
+        "id": "row-metrics",
+        "label": "Success metrics",
+        "hint": "What we measure, and why those numbers",
+        "kind": "auto",
+        "src": "/scene/shared/docs/success-metrics.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.3,
+          "y": 72.3,
+          "w": 7.5,
+          "h": 5.5
+        }
+      },
+      {
+        "id": "phase-plan",
+        "label": "Phase 1 — Plan (weeks 1–2)",
+        "hint": "Lay the foundation: goals, audience, key messages",
+        "kind": "auto",
+        "src": "/scene/shared/docs/phase-1-plan.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 16.3,
+          "y": 17.4,
+          "w": 12.2,
+          "h": 19.2
+        }
+      },
+      {
+        "id": "phase-launch",
+        "label": "Phase 2 — Launch (weeks 3–4)",
+        "hint": "Kick off with impact and excitement",
+        "kind": "auto",
+        "src": "/scene/shared/docs/phase-2-launch.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 29.4,
+          "y": 17.4,
+          "w": 12.3,
+          "h": 19.2
+        }
+      },
+      {
+        "id": "phase-engage",
+        "label": "Phase 3 — Engage (weeks 5–8)",
+        "hint": "Deliver content and drive participation",
+        "kind": "auto",
+        "src": "/scene/shared/docs/phase-3-engage.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 42.6,
+          "y": 17.4,
+          "w": 12.4,
+          "h": 19.2
+        }
+      },
+      {
+        "id": "phase-reinforce",
+        "label": "Phase 4 — Reinforce (weeks 9–10)",
+        "hint": "Reinforce behaviours with reminders, stories, challenges",
+        "kind": "auto",
+        "src": "/scene/shared/docs/phase-4-reinforce.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 55.7,
+          "y": 17.4,
+          "w": 12.4,
+          "h": 19.2
+        }
+      },
+      {
+        "id": "phase-measure",
+        "label": "Phase 5 — Measure (weeks 11–12)",
+        "hint": "Measure impact, celebrate success, optimise",
+        "kind": "auto",
+        "src": "/scene/shared/docs/phase-5-measure.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 68.7,
+          "y": 17.4,
+          "w": 12.1,
+          "h": 19.2
+        }
+      },
+      {
+        "id": "asset-teaser-poster",
+        "label": "Campaign teaser poster",
+        "hint": "Download the poster",
+        "kind": "auto",
+        "src": "/scene/shared/posters/campaign-teaser.png",
+        "placement": {
+          "layout": "freeform",
+          "x": 17.1,
+          "y": 38.9,
+          "w": 10.6,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-email-announcement",
+        "label": "Email announcement",
+        "hint": "The announcement template",
+        "kind": "auto",
+        "src": "/scene/shared/docs/email-announcement.docx",
+        "placement": {
+          "layout": "freeform",
+          "x": 17.1,
+          "y": 44.6,
+          "w": 10.6,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-launch-video",
+        "label": "Launch video",
+        "hint": "Watch the kickoff film",
+        "kind": "auto",
+        "src": "/scene/shared/video/launch.mp4",
+        "placement": {
+          "layout": "freeform",
+          "x": 30.2,
+          "y": 38.9,
+          "w": 10.700000000000001,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-kickoff-email",
+        "label": "Kickoff email & intranet post",
+        "hint": "Both templates",
+        "kind": "auto",
+        "src": "/scene/shared/docs/kickoff-email-and-intranet.docx",
+        "placement": {
+          "layout": "freeform",
+          "x": 30.2,
+          "y": 44.6,
+          "w": 10.700000000000001,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-weekly-tips",
+        "label": "Weekly tips",
+        "hint": "Eight weeks of ready-to-send tips",
+        "kind": "auto",
+        "src": "/scene/shared/docs/weekly-tips.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 43.4,
+          "y": 38.9,
+          "w": 10.8,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-quizzes",
+        "label": "Quizzes & mini challenges",
+        "hint": "Run them as-is or edit",
+        "kind": "auto",
+        "src": "/scene/shared/docs/quizzes-and-challenges.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 43.4,
+          "y": 44.6,
+          "w": 10.8,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-success-stories",
+        "label": "Success stories",
+        "hint": "Real reports, told well",
+        "kind": "auto",
+        "src": "/scene/shared/docs/success-stories.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 56.5,
+          "y": 38.9,
+          "w": 10.8,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-infographics",
+        "label": "Infographics & reminders",
+        "hint": "Signage and screensaver pack",
+        "kind": "auto",
+        "src": "/scene/shared/downloads/infographics-and-reminders.zip",
+        "placement": {
+          "layout": "freeform",
+          "x": 56.5,
+          "y": 44.6,
+          "w": 10.8,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-impact-report",
+        "label": "Impact report template",
+        "hint": "What you present at the end",
+        "kind": "auto",
+        "src": "/scene/shared/docs/impact-report-template.pptx",
+        "placement": {
+          "layout": "freeform",
+          "x": 69.5,
+          "y": 38.9,
+          "w": 10.5,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "asset-survey",
+        "label": "Survey & feedback",
+        "hint": "Questions that produce usable answers",
+        "kind": "auto",
+        "src": "/scene/shared/docs/survey-and-feedback.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 69.5,
+          "y": 44.6,
+          "w": 10.5,
+          "h": 4.5
+        }
+      },
+      {
+        "id": "activities-plan",
+        "label": "Plan — key activities",
+        "hint": "Define objectives · Identify audience · Build content plan · Prepare assets",
+        "kind": "auto",
+        "src": "/scene/shared/docs/activities-plan.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 16.3,
+          "y": 51.6,
+          "w": 12.2,
+          "h": 10.5
+        }
+      },
+      {
+        "id": "activities-launch",
+        "label": "Launch — key activities",
+        "hint": "Executive kickoff · Send launch email · Publish posters · Share on channels",
+        "kind": "auto",
+        "src": "/scene/shared/docs/activities-launch.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 29.4,
+          "y": 51.6,
+          "w": 12.3,
+          "h": 10.5
+        }
+      },
+      {
+        "id": "activities-engage",
+        "label": "Engage — key activities",
+        "hint": "Weekly topics · Run quizzes · Share real stories · Encourage participation",
+        "kind": "auto",
+        "src": "/scene/shared/docs/activities-engage.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 42.6,
+          "y": 51.6,
+          "w": 12.4,
+          "h": 10.5
+        }
+      },
+      {
+        "id": "activities-reinforce",
+        "label": "Reinforce — key activities",
+        "hint": "Run challenges · Share success stories · Send reminders · Manager engagement",
+        "kind": "auto",
+        "src": "/scene/shared/docs/activities-reinforce.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 55.7,
+          "y": 51.6,
+          "w": 12.4,
+          "h": 10.5
+        }
+      },
+      {
+        "id": "activities-measure",
+        "label": "Measure — key activities",
+        "hint": "Track participation · Measure behaviour · Collect feedback · Report results",
+        "kind": "auto",
+        "src": "/scene/shared/docs/activities-measure.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 68.7,
+          "y": 51.6,
+          "w": 12.1,
+          "h": 10.5
+        }
+      },
+      {
+        "id": "audience-plan",
+        "label": "Plan — audience",
+        "hint": "Leadership · IT & security teams",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-plan.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 16.3,
+          "y": 64.5,
+          "w": 12.2,
+          "h": 5.4
+        }
+      },
+      {
+        "id": "audience-launch",
+        "label": "Launch — audience",
+        "hint": "All employees, company wide",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-launch.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 29.4,
+          "y": 64.5,
+          "w": 12.3,
+          "h": 5.4
+        }
+      },
+      {
+        "id": "audience-engage",
+        "label": "Engage — audience",
+        "hint": "Employees · People managers",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-engage.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 42.6,
+          "y": 64.5,
+          "w": 12.4,
+          "h": 5.4
+        }
+      },
+      {
+        "id": "audience-reinforce",
+        "label": "Reinforce — audience",
+        "hint": "High-risk groups · Department leads",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-reinforce.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 55.7,
+          "y": 64.5,
+          "w": 12.4,
+          "h": 5.4
+        }
+      },
+      {
+        "id": "audience-measure",
+        "label": "Measure — audience",
+        "hint": "Leadership · Security champions",
+        "kind": "auto",
+        "src": "/scene/shared/docs/audience-measure.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 68.7,
+          "y": 64.5,
+          "w": 12.1,
+          "h": 5.4
+        }
+      },
+      {
+        "id": "metrics-plan",
+        "label": "Plan — success metrics",
+        "hint": "Plan completed · Assets ready · Channels confirmed",
+        "kind": "auto",
+        "src": "/scene/shared/docs/metrics-plan.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 16.3,
+          "y": 72.1,
+          "w": 12.2,
+          "h": 8.5
+        }
+      },
+      {
+        "id": "metrics-launch",
+        "label": "Launch — success metrics",
+        "hint": "Launch reach · Email open rate · Intranet views",
+        "kind": "auto",
+        "src": "/scene/shared/docs/metrics-launch.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 29.4,
+          "y": 72.1,
+          "w": 12.3,
+          "h": 8.5
+        }
+      },
+      {
+        "id": "metrics-engage",
+        "label": "Engage — success metrics",
+        "hint": "Content engagement · Quiz participation · Behaviour adoption",
+        "kind": "auto",
+        "src": "/scene/shared/docs/metrics-engage.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 42.6,
+          "y": 72.1,
+          "w": 12.4,
+          "h": 8.5
+        }
+      },
+      {
+        "id": "metrics-reinforce",
+        "label": "Reinforce — success metrics",
+        "hint": "Challenge participation · Story submissions · Repeat engagement",
+        "kind": "auto",
+        "src": "/scene/shared/docs/metrics-reinforce.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 55.7,
+          "y": 72.1,
+          "w": 12.4,
+          "h": 8.5
+        }
+      },
+      {
+        "id": "metrics-measure",
+        "label": "Measure — success metrics",
+        "hint": "Training completion · Survey score · Risk reduction",
+        "kind": "auto",
+        "src": "/scene/shared/docs/metrics-measure.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 68.7,
+          "y": 72.1,
+          "w": 12.1,
+          "h": 8.5
+        }
+      },
+      {
+        "id": "top-priorities",
+        "label": "Top priorities",
+        "hint": "Engage, reduce risk, measure, build culture",
+        "kind": "auto",
+        "src": "/scene/shared/docs/top-priorities.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.1,
+          "y": 23.4,
+          "w": 12.7,
+          "h": 19.5
+        }
+      },
+      {
+        "id": "campaign-pillars",
+        "label": "The five campaign pillars",
+        "hint": "The message underneath every asset",
+        "kind": "auto",
+        "src": "/scene/shared/docs/campaign-pillars.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 80.7,
+          "y": 43.8,
+          "w": 13.3,
+          "h": 6.4
+        }
+      },
+      {
+        "id": "pillar-think-before-you-click",
+        "label": "Think Before You Click",
+        "hint": "Stay alert to phishing threats",
+        "kind": "auto",
+        "src": "/scene/shared/docs/pillar-think-before-you-click.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.9,
+          "y": 50.8,
+          "w": 11.2,
+          "h": 4.4
+        }
+      },
+      {
+        "id": "pillar-protect-your-data",
+        "label": "Protect Your Data",
+        "hint": "Keep company data secure",
+        "kind": "auto",
+        "src": "/scene/shared/docs/pillar-protect-your-data.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.9,
+          "y": 56.449999999999996,
+          "w": 11.2,
+          "h": 4.4
+        }
+      },
+      {
+        "id": "pillar-secure-every-device",
+        "label": "Secure Every Device",
+        "hint": "Lock it. Update it. Protect it.",
+        "kind": "auto",
+        "src": "/scene/shared/docs/pillar-secure-every-device.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.9,
+          "y": 62.099999999999994,
+          "w": 11.2,
+          "h": 4.4
+        }
+      },
+      {
+        "id": "pillar-speak-up-report-it",
+        "label": "Speak Up, Report It",
+        "hint": "Report suspicious activity",
+        "kind": "auto",
+        "src": "/scene/shared/docs/pillar-speak-up-report-it.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.9,
+          "y": 67.75,
+          "w": 11.2,
+          "h": 4.4
+        }
+      },
+      {
+        "id": "pillar-stronger-together",
+        "label": "Stronger Together",
+        "hint": "We all play a role in security",
+        "kind": "auto",
+        "src": "/scene/shared/docs/pillar-stronger-together.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 81.9,
+          "y": 73.4,
+          "w": 11.2,
+          "h": 4.4
+        }
+      },
+      {
+        "id": "timeline",
+        "label": "Twelve-week timeline",
+        "hint": "The whole campaign on one page",
+        "download": {
+          "href": "/scene/shared/docs/campaign-timeline.pdf",
+          "filename": "Awareness-Month-Timeline.pdf",
+          "sizeLabel": "1.1 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/campaign-timeline.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 8.5,
+          "y": 83.8,
+          "w": 68.4,
+          "h": 9
+        }
+      },
+      {
+        "id": "closing-note",
+        "label": "Small actions. Big impact. Stronger together.",
+        "hint": "The line the whole campaign hangs on",
+        "kind": "letter",
+        "bodyMdx": "Small actions. Big impact. Stronger together.\n\nThree sentences, on a sticky note, at the bottom of a board that took twelve weeks to plan. That is not an accident.\n\nEverything above — the phases, the assets, the metrics — exists to make one idea survive contact with a busy Tuesday. If a colleague can repeat the line back to you in November, the campaign worked.",
+        "signature": {
+          "name": "Aspire Tech",
+          "title": "Security Awareness Training"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 78,
+          "y": 82.8,
+          "w": 13.2,
+          "h": 12.7
+        }
+      }
+    ],
+    "seo": {
+      "title": "Security Awareness Month campaign planner",
+      "description": "A twelve-week Awareness Month campaign in five phases — plan, launch, engage, reinforce, measure — with every asset, audience and success metric mapped out.",
+      "ogImage": "/scene/stages/campaign-planner-og.jpg",
+      "schema": "CollectionPage"
+    },
+    "tracking": {
+      "campaign": "awareness-month-2026",
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "executive-briefing",
+    "routes": [
+      {
+        "site": "asat",
+        "slug": "executive-briefing",
+        "canonical": true,
+        "indexable": true,
+        "status": "live",
+        "publishedAt": "2026-08-30"
+      }
+    ],
+    "preset": "desk",
+    "layout": "freeform",
+    "audience": {
+      "nameplate": "Chief Information Security Officers",
+      "prefix": "Briefing prepared for"
+    },
+    "stage": {
+      "background": {
+        "src": "/scene/stages/executive-briefing.webp",
+        "width": 1536,
+        "height": 1024,
+        "alt": "A minimal executive desk viewed from above: a CISO nameplate, a tablet playing a security video, a leather notebook, and six document covers laid out in a row."
+      },
+      "theme": "dark"
+    },
+    "chrome": "full",
+    "banner": {
+      "text": "The short version: what we do, what it costs, what changes.",
+      "cta": {
+        "label": "Book a walkthrough",
+        "href": "/request-demo"
+      }
+    },
+    "items": [
+      {
+        "id": "ciso-card",
+        "label": "Your programme lead",
+        "hint": "View contact details",
+        "kind": "card",
+        "person": {
+          "name": "Adam Tanjil",
+          "title": "CEO & Chairman, Aspire Tech",
+          "photo": "/scene/shared/adam.jpg",
+          "email": "tanjil@aspiretss.com",
+          "phones": [
+            {
+              "label": "USA",
+              "number": "+1 (917) 600-9233"
+            }
+          ],
+          "address": "11 Broadway, New York, NY 10004, USA",
+          "website": "https://www.securityawarenesstraining.ai"
+        },
+        "social": [
+          {
+            "network": "linkedin",
+            "href": "https://www.linkedin.com/company/aspire-tech-security-awareness-training"
+          }
+        ],
+        "vcard": "/api/scene/vcard/ciso-card",
+        "placement": {
+          "layout": "freeform",
+          "x": 9.65765341762122,
+          "y": 7.44438176282587,
+          "w": 17.1,
+          "h": 11.9,
+          "rotate": -9
+        }
+      },
+      {
+        "id": "briefing-video",
+        "label": "The two-minute briefing",
+        "hint": "Watch before you read anything else",
+        "kind": "auto",
+        "src": "/scene/shared/video/executive-briefing.mp4",
+        "poster": "/scene/shared/video/executive-briefing-poster.jpg",
+        "placement": {
+          "layout": "freeform",
+          "x": 31.06939718986321,
+          "y": 3.5,
+          "w": 39.5,
+          "h": 40.5
+        }
+      },
+      {
+        "id": "notebook",
+        "label": "Cyber Security Awareness Handbook",
+        "hint": "The reference, cover to cover",
+        "download": {
+          "href": "/scene/shared/docs/handbook.pdf",
+          "filename": "Aspire-Cyber-Security-Awareness-Handbook.pdf",
+          "sizeLabel": "1.2 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/handbook.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 74.2,
+          "y": 6.1,
+          "w": 13.8,
+          "h": 35.7
+        }
+      },
+      {
+        "id": "doc-executive-brief",
+        "label": "Executive brief",
+        "hint": "Two pages, no jargon",
+        "download": {
+          "href": "/scene/shared/docs/executive-brief.pdf",
+          "filename": "Aspire-Executive-Brief.pdf",
+          "sizeLabel": "1.1 KB"
+        },
+        "kind": "auto",
+        "src": "/scene/shared/docs/executive-brief.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 2.3,
+          "y": 48.3,
+          "w": 15.8,
+          "h": 39.2
+        }
+      },
+      {
+        "id": "doc-company-overview",
+        "label": "Company overview",
+        "hint": "Who we are and who we work with",
+        "kind": "auto",
+        "src": "/scene/shared/docs/company-overview.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 19.9,
+          "y": 48.3,
+          "w": 15.3,
+          "h": 39.2
+        }
+      },
+      {
+        "id": "doc-capabilities",
+        "label": "What the platform does",
+        "hint": "Training, simulation, reporting, support",
+        "kind": "auto",
+        "src": "/scene/shared/docs/capabilities.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 35.7,
+          "y": 48.3,
+          "w": 15.8,
+          "h": 39.2
+        }
+      },
+      {
+        "id": "doc-letter",
+        "label": "A note from the team",
+        "hint": "Why we built this the way we did",
+        "kind": "letter",
+        "bodyMdx": "Dear {{firstName}},\n\nMost security awareness programmes fail quietly. Completion hits ninety-five per cent, the board sees a green number, and the next breach still starts with somebody clicking something on a Tuesday morning.\n\nWe built this platform around the number that actually moves: how often your people report something suspicious. That figure only rises when three things are true — they noticed, they judged it worth flagging, and they trusted that flagging it would not make them look foolish.\n\nThe first is training. The other two are culture, and they take longer.\n\nEverything on this desk exists to shorten that second part.",
+        "letterheadSrc": "/scene/shared/letterhead-aspire.svg",
+        "signature": {
+          "name": "Adam Tanjil",
+          "title": "CEO & Chairman, Aspire Tech"
+        },
+        "placement": {
+          "layout": "freeform",
+          "x": 51.6,
+          "y": 48.3,
+          "w": 14.3,
+          "h": 39.2
+        }
+      },
+      {
+        "id": "doc-assurance",
+        "label": "Compliance & certifications",
+        "hint": "ISO 27001, SOC 2, GDPR and the rest",
+        "kind": "auto",
+        "src": "/scene/shared/docs/compliance-and-certifications.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 66.5,
+          "y": 48.3,
+          "w": 15,
+          "h": 39.2
+        }
+      },
+      {
+        "id": "doc-reporting",
+        "label": "Reporting & measurement",
+        "hint": "What lands on the board pack",
+        "kind": "auto",
+        "src": "/scene/shared/docs/reporting-and-measurement.pdf",
+        "placement": {
+          "layout": "freeform",
+          "x": 82.2,
+          "y": 48.3,
+          "w": 15.4,
+          "h": 39.2
+        }
+      }
+    ],
+    "seo": {
+      "title": "Security awareness training — executive briefing",
+      "description": "The short version for security leaders: a two-minute video, a two-page brief, and the compliance, capability and reporting detail behind it.",
+      "ogImage": "/scene/stages/executive-briefing-og.jpg",
+      "schema": "CollectionPage"
+    },
+    "tracking": {
+      "campaign": "executive-briefing",
+      "source": "linkedin"
+    }
+  }
+]

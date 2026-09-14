@@ -1,0 +1,290 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1400" width="2400" height="1400" role="img" aria-label="An executive desk viewed from above">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a2c1a"/>
+      <stop offset="0.45" stop-color="#633b22"/>
+      <stop offset="1" stop-color="#38200f"/>
+    </linearGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#23262c"/>
+      <stop offset="1" stop-color="#14161a"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#fdfdfb"/>
+      <stop offset="1" stop-color="#e9e7e0"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#12324a"/>
+      <stop offset="0.55" stop-color="#0d4f6e"/>
+      <stop offset="1" stop-color="#0a1f30"/>
+    </linearGradient>
+    <linearGradient id="blueBook" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#1e4d8c"/>
+      <stop offset="1" stop-color="#122f57"/>
+    </linearGradient>
+    <linearGradient id="redBook" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#b8232c"/>
+      <stop offset="1" stop-color="#7d151c"/>
+    </linearGradient>
+    <linearGradient id="tealBook" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#177e83"/>
+      <stop offset="1" stop-color="#0d4a4e"/>
+    </linearGradient>
+    <linearGradient id="slateBook" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#39424f"/>
+      <stop offset="1" stop-color="#1f252e"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8cf94"/>
+      <stop offset="0.5" stop-color="#b8942f"/>
+      <stop offset="1" stop-color="#8a6c1c"/>
+    </linearGradient>
+
+    <filter id="drop" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.42"/>
+    </filter>
+    <filter id="dropSm" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#000" flood-opacity="0.38"/>
+    </filter>
+
+    <!-- Subtle wood grain -->
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9 0.012" numOctaves="3" seed="7"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.16"/></feComponentTransfer>
+    </filter>
+    <filter id="leatherGrain">
+      <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="3"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer>
+    </filter>
+
+    <radialGradient id="vignette" cx="0.5" cy="0.42" r="0.78">
+      <stop offset="0.45" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ===================== Desk surface ===================== -->
+  <rect width="2400" height="1400" fill="url(#wood)"/>
+  <rect width="2400" height="1400" filter="url(#grain)" opacity="0.9"/>
+
+  <!-- Plank seams -->
+  <g stroke="#2a170a" stroke-opacity="0.5" stroke-width="3">
+    <line x1="0" y1="300" x2="2400" y2="300"/>
+    <line x1="0" y1="720" x2="2400" y2="720"/>
+    <line x1="0" y1="1120" x2="2400" y2="1120"/>
+  </g>
+
+  <!-- Leather desk pad -->
+  <g filter="url(#drop)">
+    <rect x="90" y="40" width="2230" height="1290" rx="18" fill="url(#leather)"/>
+    <rect x="90" y="40" width="2230" height="1290" rx="18" filter="url(#leatherGrain)"/>
+    <rect x="112" y="62" width="2186" height="1246" rx="10" fill="none" stroke="#3a3f47" stroke-width="3"/>
+  </g>
+
+  <!-- ===================== Nameplate  (120,56 504x126) ===================== -->
+  <g filter="url(#dropSm)">
+    <rect x="120" y="56" width="504" height="126" rx="8" fill="#1a1d22"/>
+    <rect x="120" y="56" width="504" height="126" rx="8" fill="none" stroke="url(#brass)" stroke-width="4"/>
+    <rect x="120" y="176" width="504" height="14" rx="4" fill="url(#brass)" opacity="0.85"/>
+  </g>
+
+  <!-- ===================== Monitor  (816,70 720x518) ===================== -->
+  <g filter="url(#drop)">
+    <rect x="816" y="70" width="720" height="518" rx="22" fill="#0e0f12"/>
+    <rect x="838" y="92" width="676" height="440" rx="10" fill="url(#screen)"/>
+    <!-- screen content: abstract dashboard -->
+    <g opacity="0.9">
+      <rect x="866" y="120" width="240" height="16" rx="8" fill="#8fd4ff" opacity="0.75"/>
+      <rect x="866" y="152" width="150" height="12" rx="6" fill="#8fd4ff" opacity="0.4"/>
+      <g fill="#7fe3c4" opacity="0.75">
+        <rect x="866" y="330" width="46" height="150" rx="6"/>
+        <rect x="928" y="366" width="46" height="114" rx="6"/>
+        <rect x="990" y="300" width="46" height="180" rx="6"/>
+        <rect x="1052" y="392" width="46" height="88" rx="6"/>
+      </g>
+      <path d="M1160 430 L1230 372 L1300 400 L1370 316 L1450 288" fill="none" stroke="#ffd27a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="1450" cy="288" r="11" fill="#ffd27a"/>
+      <rect x="1160" y="120" width="330" height="120" rx="10" fill="#0a2438" opacity="0.7"/>
+      <circle cx="1225" cy="180" r="34" fill="none" stroke="#8fd4ff" stroke-width="8" opacity="0.8"/>
+      <path d="M1225 146 A34 34 0 0 1 1256 198" fill="none" stroke="#ffd27a" stroke-width="8" stroke-linecap="round"/>
+      <rect x="1282" y="150" width="180" height="12" rx="6" fill="#8fd4ff" opacity="0.5"/>
+      <rect x="1282" y="176" width="140" height="12" rx="6" fill="#8fd4ff" opacity="0.32"/>
+      <rect x="1282" y="202" width="164" height="12" rx="6" fill="#8fd4ff" opacity="0.32"/>
+    </g>
+    <!-- play affordance -->
+    <circle cx="1176" cy="312" r="58" fill="#000" opacity="0.42"/>
+    <path d="M1158 284 L1210 312 L1158 340 Z" fill="#fff" opacity="0.92"/>
+    <!-- stand -->
+    <rect x="1116" y="588" width="120" height="34" rx="6" fill="#15171b"/>
+    <rect x="1036" y="614" width="280" height="18" rx="9" fill="#1b1e23"/>
+  </g>
+
+  <!-- ===================== Business card  (1716,98 408x182, -3deg) ===================== -->
+  <g transform="rotate(-3 1920 189)" filter="url(#dropSm)">
+    <rect x="1716" y="98" width="408" height="182" rx="10" fill="url(#paper)"/>
+    <rect x="1716" y="98" width="408" height="42" rx="10" fill="#123a63"/>
+    <rect x="1716" y="128" width="408" height="12" fill="#123a63"/>
+    <circle cx="1782" cy="196" r="40" fill="#c8cdd6"/>
+    <circle cx="1782" cy="184" r="15" fill="#98a1af"/>
+    <path d="M1756 218 a26 22 0 0 1 52 0 z" fill="#98a1af"/>
+    <rect x="1842" y="166" width="176" height="16" rx="6" fill="#1d232c"/>
+    <rect x="1842" y="192" width="120" height="11" rx="5" fill="#6b737f"/>
+    <rect x="1842" y="216" width="200" height="9" rx="4" fill="#98a1af"/>
+    <rect x="1842" y="234" width="164" height="9" rx="4" fill="#98a1af"/>
+    <!-- QR -->
+    <g fill="#1d232c">
+      <rect x="2044" y="196" width="56" height="56" rx="4" fill="#fff" stroke="#1d232c" stroke-width="3"/>
+      <rect x="2052" y="204" width="14" height="14"/><rect x="2078" y="204" width="14" height="14"/>
+      <rect x="2052" y="230" width="14" height="14"/><rect x="2070" y="222" width="8" height="8"/>
+      <rect x="2084" y="234" width="8" height="8"/>
+    </g>
+  </g>
+
+  <!-- ===================== Phone  (180,238 240x406, 4deg) ===================== -->
+  <g transform="rotate(4 300 441)" filter="url(#drop)">
+    <rect x="180" y="238" width="240" height="406" rx="34" fill="#0d0f13"/>
+    <rect x="194" y="252" width="212" height="378" rx="26" fill="#171c24"/>
+    <rect x="268" y="262" width="64" height="10" rx="5" fill="#0d0f13"/>
+    <!-- waveform -->
+    <g fill="#4fb8e8">
+      <rect x="216" y="406" width="9" height="44" rx="4.5"/>
+      <rect x="234" y="386" width="9" height="84" rx="4.5"/>
+      <rect x="252" y="360" width="9" height="136" rx="4.5"/>
+      <rect x="270" y="392" width="9" height="72" rx="4.5"/>
+      <rect x="288" y="342" width="9" height="172" rx="4.5"/>
+      <rect x="306" y="378" width="9" height="100" rx="4.5"/>
+      <rect x="324" y="400" width="9" height="56" rx="4.5"/>
+      <rect x="342" y="370" width="9" height="116" rx="4.5"/>
+      <rect x="360" y="398" width="9" height="60" rx="4.5"/>
+    </g>
+    <rect x="216" y="524" width="168" height="6" rx="3" fill="#39414d"/>
+    <rect x="216" y="524" width="70" height="6" rx="3" fill="#4fb8e8"/>
+    <circle cx="300" cy="580" r="30" fill="#4fb8e8"/>
+    <path d="M290 566 L316 580 L290 594 Z" fill="#0d0f13"/>
+    <rect x="228" y="298" width="144" height="11" rx="5" fill="#39414d"/>
+    <rect x="228" y="320" width="106" height="11" rx="5" fill="#2b323c"/>
+  </g>
+
+  <!-- ===================== Programme brochure  (1584,350 456x476, 5deg) ===================== -->
+  <g transform="rotate(5 1812 588)" filter="url(#drop)">
+    <rect x="1584" y="350" width="456" height="476" rx="8" fill="url(#blueBook)"/>
+    <rect x="1584" y="350" width="20" height="476" rx="4" fill="#0d2445" opacity="0.85"/>
+    <circle cx="1812" cy="452" r="46" fill="none" stroke="#7fc4ff" stroke-width="7" opacity="0.9"/>
+    <path d="M1794 452 v-16 a18 18 0 0 1 36 0 v16" fill="none" stroke="#7fc4ff" stroke-width="7"/>
+    <rect x="1794" y="452" width="36" height="30" rx="5" fill="#7fc4ff"/>
+    <rect x="1650" y="530" width="324" height="15" rx="7" fill="#ffffff" opacity="0.92"/>
+    <rect x="1650" y="558" width="270" height="15" rx="7" fill="#ffffff" opacity="0.7"/>
+    <rect x="1650" y="586" width="300" height="15" rx="7" fill="#ffffff" opacity="0.55"/>
+    <rect x="1650" y="632" width="230" height="42" rx="21" fill="#ffd34d"/>
+    <rect x="1650" y="700" width="324" height="94" rx="6" fill="#0d2445" opacity="0.55"/>
+    <g fill="#7fc4ff" opacity="0.55">
+      <circle cx="1692" cy="750" r="17"/><circle cx="1736" cy="750" r="17"/>
+      <circle cx="1780" cy="750" r="17"/><circle cx="1824" cy="750" r="17"/>
+      <circle cx="1868" cy="750" r="17"/><circle cx="1912" cy="750" r="17"/>
+    </g>
+  </g>
+
+  <!-- ===================== Letter  (792,658 552x630, -2deg) ===================== -->
+  <g transform="rotate(-2 1068 973)" filter="url(#drop)">
+    <rect x="792" y="658" width="552" height="630" rx="6" fill="url(#paper)"/>
+    <!-- letterhead -->
+    <circle cx="852" cy="716" r="24" fill="none" stroke="#2b9fd6" stroke-width="6"/>
+    <path d="M840 716 v-9 a12 12 0 0 1 24 0 v9" fill="none" stroke="#2b9fd6" stroke-width="6"/>
+    <rect x="900" y="700" width="380" height="15" rx="7" fill="#1e4d8c"/>
+    <rect x="900" y="724" width="240" height="9" rx="4" fill="#8b93a0"/>
+    <line x1="828" y1="762" x2="1308" y2="762" stroke="#c9cdd4" stroke-width="3"/>
+    <!-- body -->
+    <g fill="#5c626c">
+      <rect x="828" y="800" width="430" height="11" rx="5" fill="#2b3038"/>
+      <rect x="828" y="840" width="180" height="10" rx="5"/>
+      <rect x="828" y="874" width="470" height="9" rx="4"/>
+      <rect x="828" y="896" width="450" height="9" rx="4"/>
+      <rect x="828" y="918" width="410" height="9" rx="4"/>
+      <rect x="828" y="960" width="470" height="9" rx="4"/>
+      <rect x="828" y="982" width="440" height="9" rx="4"/>
+      <rect x="828" y="1004" width="465" height="9" rx="4"/>
+      <rect x="828" y="1026" width="330" height="9" rx="4"/>
+      <rect x="828" y="1068" width="450" height="9" rx="4"/>
+      <rect x="828" y="1090" width="470" height="9" rx="4"/>
+      <rect x="828" y="1112" width="380" height="9" rx="4"/>
+    </g>
+    <!-- signature -->
+    <path d="M840 1200 c30 -34 52 12 78 -14 c22 -22 40 20 66 -6 c18 -18 34 14 52 0"
+          fill="none" stroke="#2b3a63" stroke-width="6" stroke-linecap="round"/>
+    <rect x="840" y="1232" width="180" height="9" rx="4" fill="#8b93a0"/>
+  </g>
+
+  <!-- ===================== Buyer's guide  (132,714 456x462, -6deg) ===================== -->
+  <g transform="rotate(-6 360 945)" filter="url(#drop)">
+    <rect x="132" y="714" width="456" height="462" rx="8" fill="#f2f0ea"/>
+    <rect x="132" y="714" width="456" height="150" rx="8" fill="#f2f0ea"/>
+    <rect x="132" y="864" width="456" height="312" fill="url(#redBook)"/>
+    <rect x="132" y="714" width="18" height="462" fill="#8f1a20" opacity="0.5"/>
+    <g fill="#2b3038">
+      <rect x="176" y="762" width="330" height="17" rx="8"/>
+      <rect x="176" y="792" width="250" height="17" rx="8"/>
+      <rect x="176" y="826" width="180" height="12" rx="6" fill="#8b93a0"/>
+    </g>
+    <g fill="#ffffff" opacity="0.55">
+      <rect x="176" y="1096" width="220" height="9" rx="4"/>
+      <rect x="176" y="1116" width="170" height="9" rx="4"/>
+    </g>
+  </g>
+
+  <!-- ===================== Folder row ===================== -->
+  <!-- Handbook (1440,896 288x350) -->
+  <g filter="url(#dropSm)">
+    <rect x="1440" y="896" width="288" height="350" rx="7" fill="url(#tealBook)"/>
+    <rect x="1440" y="896" width="14" height="350" rx="3" fill="#0a3b3e" opacity="0.85"/>
+    <rect x="1482" y="940" width="204" height="128" rx="6" fill="#ffffff" opacity="0.16"/>
+    <path d="M1584 972 v56 M1556 1000 h56" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+    <rect x="1482" y="1100" width="204" height="13" rx="6" fill="#fff" opacity="0.85"/>
+    <rect x="1482" y="1126" width="150" height="13" rx="6" fill="#fff" opacity="0.55"/>
+    <rect x="1482" y="1152" width="176" height="13" rx="6" fill="#fff" opacity="0.4"/>
+  </g>
+
+  <!-- SOC brochure (1764,896 288x350) -->
+  <g filter="url(#dropSm)">
+    <rect x="1764" y="896" width="288" height="350" rx="7" fill="url(#blueBook)"/>
+    <rect x="1764" y="896" width="14" height="350" rx="3" fill="#0d2445" opacity="0.85"/>
+    <g stroke="#7fc4ff" stroke-width="4" opacity="0.55" fill="none">
+      <rect x="1806" y="940" width="204" height="128" rx="6"/>
+      <line x1="1806" y1="982" x2="2010" y2="982"/>
+      <line x1="1806" y1="1024" x2="2010" y2="1024"/>
+      <line x1="1874" y1="940" x2="1874" y2="1068"/>
+      <line x1="1942" y1="940" x2="1942" y2="1068"/>
+    </g>
+    <circle cx="1908" cy="1004" r="15" fill="#ffb648"/>
+    <rect x="1806" y="1100" width="204" height="13" rx="6" fill="#ffb648" opacity="0.9"/>
+    <rect x="1806" y="1126" width="150" height="13" rx="6" fill="#fff" opacity="0.5"/>
+    <rect x="1806" y="1152" width="176" height="13" rx="6" fill="#fff" opacity="0.35"/>
+  </g>
+
+  <!-- 21 Critical Questions (2088,896 264x350) -->
+  <g filter="url(#dropSm)">
+    <rect x="2088" y="896" width="264" height="350" rx="7" fill="url(#slateBook)"/>
+    <rect x="2088" y="896" width="14" height="350" rx="3" fill="#141920" opacity="0.85"/>
+    <text x="2130" y="1024" font-family="Helvetica, Arial, sans-serif" font-size="112" font-weight="700" fill="#3fbfae">21</text>
+    <rect x="2130" y="1056" width="184" height="14" rx="7" fill="#fff" opacity="0.85"/>
+    <rect x="2130" y="1084" width="140" height="14" rx="7" fill="#fff" opacity="0.55"/>
+    <rect x="2130" y="1112" width="164" height="14" rx="7" fill="#fff" opacity="0.4"/>
+    <g stroke="#3fbfae" stroke-width="3" opacity="0.4" fill="none">
+      <path d="M2110 1176 h60 v34 h58"/>
+      <path d="M2200 1176 h44 v34 h72"/>
+      <circle cx="2170" cy="1176" r="5" fill="#3fbfae" stroke="none"/>
+      <circle cx="2244" cy="1210" r="5" fill="#3fbfae" stroke="none"/>
+    </g>
+  </g>
+
+  <!-- ===================== Pen ===================== -->
+  <g transform="rotate(-24 1330 1290)" filter="url(#dropSm)">
+    <rect x="1180" y="1276" width="300" height="26" rx="13" fill="#5b1a1f"/>
+    <rect x="1180" y="1276" width="66" height="26" rx="13" fill="url(#brass)"/>
+    <path d="M1480 1276 l38 13 l-38 13 z" fill="url(#brass)"/>
+  </g>
+
+  <!-- ===================== Lighting ===================== -->
+  <rect width="2400" height="1400" fill="url(#vignette)"/>
+</svg>

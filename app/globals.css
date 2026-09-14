@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 220 20% 92%;
+    --card: 222 30% 11%;
+    --card-foreground: 220 20% 92%;
+    --primary: 41 97% 61%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 222 26% 16%;
+    --secondary-foreground: 220 20% 92%;
+    --muted: 222 26% 14%;
+    --muted-foreground: 220 12% 62%;
+    --accent: 222 26% 18%;
+    --accent-foreground: 220 20% 92%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 220 20% 96%;
+    --border: 222 22% 20%;
+    --input: 222 22% 20%;
+    --ring: 41 97% 61%;
+    --radius: 0.6rem;
+
+    /* Overwritten per brand by <Scene>; this is the fallback. */
+    --brand-accent: #fcbc3a;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: scene-vt-out 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: scene-vt-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes scene-vt-out {
+  to {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.98);
+  }
+}
+
+@keyframes scene-vt-in {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes hotspot-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--brand-accent) 42%, transparent),
+      0 0 16px 2px color-mix(in srgb, var(--brand-accent) 28%, transparent);
+    background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--brand-accent) 88%, transparent),
+      0 0 32px 8px color-mix(in srgb, var(--brand-accent) 55%, transparent);
+    background: color-mix(in srgb, var(--brand-accent) 18%, transparent);
+  }
+}
+
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.scene-hotspot {
+  @apply absolute inset-0 rounded-[inherit];
+  background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  animation: hotspot-breathe 3.8s ease-in-out infinite;
+  transition:
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .scene-hotspot,
+.group:focus-visible .scene-hotspot {
+  transform: scale(1.045);
+  background: color-mix(in srgb, var(--brand-accent) 16%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--brand-accent) 70%, transparent),
+    0 18px 40px -12px color-mix(in srgb, var(--brand-accent) 45%, transparent);
+  animation: none;
+}
+
+.scene-hotspot-label {
+  @apply pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10
+    max-w-[14rem] -translate-x-1/2 truncate rounded-full border border-white/10
+    bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 shadow-lg
+    backdrop-blur-md;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition:
+    opacity 280ms 60ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 280ms 60ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .scene-hotspot-label,
+.group:focus-visible .scene-hotspot-label {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.scene-stage {
+  animation: stage-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  .scene-hotspot,
+  .scene-hotspot-label,
+  .scene-stage {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .scene-hotspot {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-accent) 55%, transparent);
+    background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  }
+
+  .scene-hotspot-label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
