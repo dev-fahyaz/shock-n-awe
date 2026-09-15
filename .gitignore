@@ -15,3 +15,4 @@ next-env.d.ts
 
 # Generated at prebuild from the app/ directory
 scene/reserved.json
+supabase/

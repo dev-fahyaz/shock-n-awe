@@ -1,15 +1,20 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import { parseScenes, sceneConfigSchema, type ValidatedScene } from '../schema';
 import type { SceneConfig, SceneRoute, SiteKey } from '../types';
+import {
+  isSupabaseConfigured,
+  loadScenesFromSupabase,
+  saveScenesToSupabase,
+} from './supabase';
 
 /**
- * Local JSON store.
+ * Scene store.
  *
- * The live source for scenes until a database lands. Reads and writes
- * `content/scenes.json` (or a file path in `SCENE_SOURCE_URL`). Every write is
- * schema-validated. Slug changes append to `slugHistory`.
+ * Setup writes go to sna_scenes only. content/scenes.json is a one-time seed
+ * when the table is empty — never written back. An `https://` SCENE_SOURCE_URL
+ * is treated as a remote CMS and stays read-only.
  */
 
 const DEFAULT_FILE = 'content/scenes.json';
@@ -63,13 +68,33 @@ function locked<T>(fn: () => Promise<T>): Promise<T> {
   return run;
 }
 
-async function seedIfMissing(path: string): Promise<void> {
+function assertWritable() {
+  if (isRemoteSource()) {
+    throw new StoreError('cannot write to a remote scene source', 501);
+  }
+  if (!isSupabaseConfigured()) {
+    throw new StoreError(
+      'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.',
+      503,
+    );
+  }
+}
+
+async function readJsonSeed(): Promise<ValidatedScene[]> {
   try {
-    await readFile(path, 'utf8');
+    const raw = JSON.parse(await readFile(storePath(), 'utf8'));
+    const report = parseScenes(raw);
+    if (report.issues.length) {
+      console.warn(
+        `[scene] ${report.issues.length} config issue(s), ` +
+          `${report.droppedItems} item(s) dropped:\n  ` +
+          report.issues.slice(0, 20).join('\n  '),
+      );
+    }
+    return report.scenes;
   } catch {
     const { allScenes } = await import('../configs');
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, `${JSON.stringify(allScenes(), null, 2)}\n`, 'utf8');
+    return parseScenes(allScenes()).scenes;
   }
 }
 
@@ -79,30 +104,30 @@ async function readAll(): Promise<ValidatedScene[]> {
     return [];
   }
 
-  const path = storePath();
-  await seedIfMissing(path);
-
-  let raw: unknown;
-  try {
-    raw = JSON.parse(await readFile(path, 'utf8'));
-  } catch (err) {
-    throw new StoreError(
-      `scene store unreadable: ${err instanceof Error ? err.message : 'unknown'}`,
-      500,
-    );
+  if (isSupabaseConfigured()) {
+    const remote = await loadScenesFromSupabase();
+    if (remote && remote.length) {
+      cache = { at: Date.now(), scenes: remote };
+      return remote;
+    }
+    const seeded = await readJsonSeed();
+    if (seeded.length) {
+      try {
+        await saveScenesToSupabase(seeded as unknown as SceneConfig[]);
+      } catch (err) {
+        throw new StoreError(
+          `supabase seed failed: ${err instanceof Error ? err.message : 'unknown'}`,
+          500,
+        );
+      }
+    }
+    cache = { at: Date.now(), scenes: seeded };
+    return seeded;
   }
 
-  const report = parseScenes(raw);
-  if (report.issues.length) {
-    console.warn(
-      `[scene] ${report.issues.length} config issue(s), ` +
-        `${report.droppedItems} item(s) dropped:\n  ` +
-        report.issues.slice(0, 20).join('\n  '),
-    );
-  }
-
-  cache = { at: Date.now(), scenes: report.scenes };
-  return report.scenes;
+  const seeded = await readJsonSeed();
+  cache = { at: Date.now(), scenes: seeded };
+  return seeded;
 }
 
 async function assertRoutes(scenes: ValidatedScene[]) {
@@ -129,6 +154,7 @@ async function assertRoutes(scenes: ValidatedScene[]) {
 }
 
 async function persist(scenes: ValidatedScene[]) {
+  assertWritable();
   await assertRoutes(scenes);
   const parsed = scenes.map(s => {
     const result = sceneConfigSchema.safeParse(s);
@@ -141,9 +167,14 @@ async function persist(scenes: ValidatedScene[]) {
     return result.data;
   });
 
-  const path = storePath();
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8');
+  try {
+    await saveScenesToSupabase(parsed as unknown as SceneConfig[]);
+  } catch (err) {
+    throw new StoreError(
+      `supabase write failed: ${err instanceof Error ? err.message : 'unknown'}`,
+      500,
+    );
+  }
   cache = { at: Date.now(), scenes: parsed };
 }
 
@@ -214,9 +245,7 @@ export function blankScene(id: string): SceneConfig {
 }
 
 export async function create(input?: Partial<SceneConfig>): Promise<SceneConfig> {
-  if (isRemoteSource()) {
-    throw new StoreError('cannot write to a remote scene source', 501);
-  }
+  assertWritable();
 
   return locked(async () => {
     const scenes = await readAll();
@@ -237,9 +266,7 @@ export async function create(input?: Partial<SceneConfig>): Promise<SceneConfig>
 }
 
 export async function update(id: string, input: SceneConfig): Promise<SceneConfig> {
-  if (isRemoteSource()) {
-    throw new StoreError('cannot write to a remote scene source', 501);
-  }
+  assertWritable();
   if (input.id !== id) {
     throw new StoreError('scene id is immutable');
   }
@@ -266,9 +293,7 @@ export async function update(id: string, input: SceneConfig): Promise<SceneConfi
 }
 
 export async function remove(id: string): Promise<SceneConfig> {
-  if (isRemoteSource()) {
-    throw new StoreError('cannot write to a remote scene source', 501);
-  }
+  assertWritable();
 
   return locked(async () => {
     const scenes = await readAll();

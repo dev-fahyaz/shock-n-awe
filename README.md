@@ -1,11 +1,10 @@
 # Shock and Awe
 
-A config-driven engine for **interactive scenes** — an executive desk, a planning board, an office environment, a server room. Every scene renders as a native landing page of whichever brand domain serves it, at a slug that can be changed without touching a component.
+A config-driven engine for **interactive scenes** — an executive desk, a planning board, an office environment, a server room. It is a standalone Next.js app. The two marketing sites ([securityawarenesstraining.ai](https://www.securityawarenesstraining.ai) and [aspiretss.com](https://aspiretss.com)) stay their own Next.js codebases. They do not copy this renderer. They ask a **fetch helper** whether a slug is a live scene.
 
-Standalone Next.js application. **No dependency on `Website_Code_base`** — it can be developed, built and deployed entirely on its own.
-
-- Full specification: `../Shock_and_Awe_Technical_Spec.md`
-- Live prototype: the Shock and Awe demo artifact
+- Engine internals: [`Shock_and_Awe_Technical_Spec.md`](Shock_and_Awe_Technical_Spec.md)
+- SQL to run once: [`supabase/schema.sql`](supabase/schema.sql)
+- Host helper: [`scene/host/client.ts`](scene/host/client.ts)
 
 ---
 
@@ -13,24 +12,151 @@ Standalone Next.js application. **No dependency on `Website_Code_base`** — it 
 
 ```bash
 npm install
-cp .env.example .env.local     # optional; see Environment below
+cp .env.example .env.local
 npm run dev                    # http://localhost:3000
 ```
 
-`/` lists every live scene route. The first scene is at `/nyc-security-desk`.
+`/` is the operator index of live scenes. Setup is `/setup`. The NYC desk is `/nyc-security-desk`.
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Regenerates the reserved-slug list, then starts Next |
 | `npm run build` | Same, then a production build |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run validate:scenes` | Slug collisions, canonical integrity, and full schema validation of dynamic content |
-
-Run `validate:scenes` in CI. It is the guard described under *Reserved slugs* below.
+| `npm run validate:scenes` | Slug collisions, canonical integrity, schema |
 
 ---
 
-## How it fits together
+## Three codebases
+
+```
+  Setup (this repo) ──writes──► Supabase Postgres (scene JSON, brand routes)
+                         └──► Storage buckets (images, PDFs only)
+
+  SAT Next.js  ──fetch helper──► Supabase get_live_post(asat, slug)
+  Aspire Next.js ──fetch helper──► Supabase get_live_post(aspire, slug)
+                         └── if live ──► this engine /{slug}
+
+  This engine ──reads──► sna_scenes (JSON is seed-only, never written back)
+```
+
+```mermaid
+flowchart TB
+  subgraph operators [Shock-and-Awe]
+    setup[Setup dashboard]
+    engine[Scene renderer]
+  end
+  subgraph data [Supabase]
+    pg[(Postgres sna_scenes + sna_media)]
+    st[(Storage images and PDFs)]
+  end
+  subgraph hosts [Marketing Next.js]
+    sat[SAT site]
+    aspire[Aspire site]
+    helper[fetch helper]
+  end
+  setup -->|"config and routes"| pg
+  setup -->|"stills and docs"| st
+  engine --> pg
+  engine --> st
+  sat --> helper
+  aspire --> helper
+  helper -->|"get_live_post"| pg
+  helper -->|"if live"| engine
+```
+
+Visitor request on a marketing domain:
+
+```
+GET /some-slug
+  → host catch-all
+  → getLiveRoute(site, slug)     // post + media[], ~45s cache
+  → miss: existing SAT/Aspire page or 404
+  → hit: iframe or proxy SCENE_ENGINE_URL/some-slug
+       → engine getByRoute → scene page
+```
+
+A new scene assigned in Setup is a new Postgres row. The next request on SAT or Aspire sees it. No host deploy. No per-scene `next.config` rewrite.
+
+---
+
+## Assign a scene to both brands
+
+In `/setup`, each row has **SAT** and **Aspire** chips (`off` / `draft` / `live`). Click to add or drop that brand, then the existing save API writes the `routes[]` on the scene. The editor URL fold shows the same summary while collapsed (`URL · SAT live · Aspire off`).
+
+- SAT (`asat`) → securityawarenesstraining.ai
+- Aspire (`aspire`) → aspiretss.com
+- New scenes start as SAT draft. Assignment is explicit.
+- When both are live, SAT stays canonical; Aspire is typically `indexable: false`.
+
+Video items keep an **external `src`**. PDF, image, card photo, and stage background are file uploads into Storage. Do not upload video.
+
+On `/setup`, **Remove unused files** deletes `sna_media` rows and bucket objects that no scene config still points at.
+
+---
+
+## Supabase
+
+Required for Setup writes. Without env vars the engine can still **read** a local JSON seed; create/update/delete and uploads return an error until keys are set.
+
+1. Create a project.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor (`sna_scenes`, `sna_media` with `scene_id` FK, `get_live_post` RPC, public buckets `scene-images` and `scene-docs`).
+3. Put the project **URL** and **service role** key (server only) in `.env.local`.
+
+| Layer | Holds |
+|---|---|
+| Postgres `sna_scenes` | Full `SceneConfig` jsonb, including text and brand routes |
+| Postgres `sna_media` | Image/PDF rows keyed by `scene_id` (cascade on scene delete) |
+| Storage | Image and PDF bytes (`scene-images`, `scene-docs`) |
+| Not stored | Video files — link only. `content/scenes.json` is never written by Setup |
+
+`get_live_post(site, slug)` returns the live scene `config` plus its `media[]`. Pass `slug` as null to list every live post for a site. Engine, Setup, and the host helper all use the service role — drafts never go to the browser.
+
+Free-tier caps (public pricing): 500 MB database, 1 GB file storage, **50 MB max upload**. Dummy PDFs fit. Large video was never going to live here.
+
+---
+
+## Fetch helper (SAT and Aspire)
+
+Copy [`scene/host/client.ts`](scene/host/client.ts) (or import it if you share this package). Env on **each host**, once (server only — same pair as this engine):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SCENE_ENGINE_URL=https://your-engine.example
+```
+
+One catch-all on the host — not a rewrite per slug:
+
+```ts
+import { getLiveRoute } from 'scene/host';
+import type { SiteKey } from 'scene/types';
+
+const SITE: SiteKey = 'asat'; // or 'aspire'
+
+export default async function CatchAll({ params }: { params: { slug: string[] } }) {
+  const slug = params.slug?.[0];
+  if (!slug || params.slug.length !== 1) return null; // fall through to the rest of the app
+  const route = await getLiveRoute(SITE, slug);
+  if (!route) return null;
+  // route.config and route.media[] come from get_live_post
+  return (
+    <iframe
+      src={route.href}
+      title={route.slug}
+      className="h-screen w-full border-0"
+    />
+  );
+}
+```
+
+`listLiveRoutes(site)` is the same `get_live_post` source (slug omitted) for a sitemap or nav. Cache is 45 seconds in-process. Helper prefers the RPC; if that is unset it falls back to `GET {SCENE_ENGINE_URL}/api/scene/navigate?site=`.
+
+Wire `getLiveRoute` in host **middleware** (or a catch-all that only runs for unknown paths). If it returns a route, proxy or iframe `route.href`. If not, let the rest of the SAT/Aspire app handle the URL. Do not list slugs in `next.config` rewrites.
+
+---
+
+## How the engine request works
 
 ```
 Request  →  middleware  →  app/[sceneSlug]/page.tsx  →  <Scene>
@@ -41,15 +167,15 @@ Request  →  middleware  →  app/[sceneSlug]/page.tsx  →  <Scene>
                                                       SceneModal → viewer
 ```
 
-Three things resolve independently and never leak into each other:
+Three things resolve independently:
 
 | Concern | Resolved by | When |
 |---|---|---|
 | **Brand** | serving host | edge, in middleware |
-| **Scene** | `(brand, slug)` via `SceneSource` | build / ISR |
+| **Scene** | `(brand, slug)` via `SceneSource` | store / ISR |
 | **Recipient** | `?r=` token | client, after first paint |
 
-Recipient personalisation happening *after* first paint is what lets a scene be both statically cached and individually personalised. Put it in the server render and every recipient needs their own cache entry.
+Recipient personalisation happens after first paint so a scene can be cached and still personalised.
 
 ---
 
@@ -76,7 +202,9 @@ Shock-and-Awe/
 │   ├── viewers/              pdf · embed built; rest are Phase 3
 │   ├── library/items.ts      shared item definitions
 │   ├── configs/              scene records + validation
-│   └── source/               SceneSource: static → json → cms
+│   ├── source/               SceneSource: JSON → Supabase
+│   └── host/                 fetch helper for SAT and Aspire
+├── supabase/schema.sql       sna_scenes, sna_media FK, get_live_post, buckets
 ├── scripts/
 │   ├── reserved-slugs.mjs    generates the collision guard list
 │   └── validate-scenes.mjs   CI check
@@ -176,24 +304,13 @@ never reaches analytics.
 ### Scenes without a deploy
 
 ```bash
-SCENE_SOURCE_URL=./content/scenes.json        # a file, re-read on revalidate
-SCENE_SOURCE_URL=https://cms/api/scenes       # an API, with SCENE_SOURCE_TOKEN
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Unset, the app runs from the compiled configs and needs no infrastructure at
-all. Set, both sources are read with the dynamic one winning, so scenes migrate
-one at a time rather than in a big bang.
+Setup upserts `sna_scenes` only. If the table is empty, JSON in `content/scenes.json` (or compiled configs) is imported once. There is no write-back to disk.
 
-Publishing goes live in seconds:
-
-```bash
-curl -X POST https://…/api/scene/revalidate \
-  -H 'content-type: application/json' \
-  -d '{"secret":"…","slugs":["banking-desk"]}'
-```
-
-`content/scenes.json` is a worked example — nine items covering every content
-type, defined entirely in JSON.
+Publishing goes live in seconds via `/api/scene/revalidate` (see `.env.example`).
 
 ### What replaces the compiler
 
@@ -264,6 +381,9 @@ That second file is currently seeded with the 25 top-level routes from the main 
 | `NEXT_PUBLIC_GTM_ASAT` | GTM container for securityawarenesstraining.ai |
 | `NEXT_PUBLIC_GTM_ASPIRE` | GTM container for aspiretss.com |
 | `NEXT_PUBLIC_FORCE_SITE` | `asat` \| `aspire` — override host resolution locally |
+| `NEXT_PUBLIC_SUPABASE_URL` | Shared project URL (engine + host helper) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Setup, engine, and host helper. Never expose to the browser |
+| `SCENE_ENGINE_URL` | Public origin of this app, for host iframes/proxy |
 | `SKIP_ENV_CHECK=1` | Allow a production build with no analytics IDs |
 
 On `localhost` the host matches neither brand, so resolution falls back to `DEFAULT_SITE` (`asat`). Use `NEXT_PUBLIC_FORCE_SITE=aspire` to see the other brand without editing your hosts file.
@@ -281,7 +401,9 @@ On `localhost` the host matches neither brand, so resolution falls back to `DEFA
 | All 14 viewers (`auto`, `pdf`, `pages`, `embed`, `image`, `video`, `audio`, `card`, `letter`, `form`, `link`, `download`, `scene`) | Done |
 | Universal media resolver — any URL picks its own viewer | Done |
 | Runtime schema validation + URL safety guards | Done |
-| Runtime scene source (JSON file or CMS API) + revalidate webhook | Done |
+| Runtime scene source (JSON, optional Supabase) | Done |
+| Fetch helper for SAT / Aspire hosts | Done |
+
 | vCard generation from card config | Done |
 | Mobile list view | Done |
 | Reserved-slug + dynamic content validation | Done |
@@ -292,6 +414,6 @@ On `localhost` the host matches neither brand, so resolution falls back to `DEFA
 
 ---
 
-## Using the engine from the website instead
+## Using the engine from SAT or Aspire
 
-The `scene/` directory has no imports outside itself and `components/ui/`, which is API-compatible with the website's `components/common/`. To consume it from `Website_Code_base` later, copy `scene/` to `features/scene/`, rewrite `components/ui/*` → `common/*` and `scene/*` → `features/scene/*`, and add the path alias. Publishing it as a private package is the tidier long-term option if both projects need it.
+Do not copy `scene/` into those apps. Copy [`scene/host/client.ts`](scene/host/client.ts), set the three env vars, and add the catch-all above. This engine keeps viewers, pdf.js, and Setup.

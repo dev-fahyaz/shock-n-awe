@@ -12,19 +12,18 @@ import type { SceneSource } from './types';
 /**
  * Runtime scene source — JSON file or HTTP.
  *
- * Local files go through `store.ts`. An `https://` SCENE_SOURCE_URL is fetched
- * with `SCENE_SOURCE_TOKEN`. Unset, the store defaults to content/scenes.json.
+ * Local files go through `store.ts` (read-only seed). An `https://` SCENE_SOURCE_URL
+ * is fetched as plain JSON. Setup writes never go back to JSON.
  */
 
 async function loadRemote(): Promise<SceneConfig[]> {
   const src = process.env.SCENE_SOURCE_URL;
   if (!src || !/^https?:\/\//i.test(src)) return storeList();
 
-  const headers: Record<string, string> = { accept: 'application/json' };
-  if (process.env.SCENE_SOURCE_TOKEN) {
-    headers.authorization = `Bearer ${process.env.SCENE_SOURCE_TOKEN}`;
-  }
-  const res = await fetch(src, { headers, cache: 'no-store' });
+  const res = await fetch(src, {
+    headers: { accept: 'application/json' },
+    cache: 'no-store',
+  });
   if (!res.ok) throw new Error(`scene source responded ${res.status}`);
   const report = parseScenes(await res.json());
   if (report.issues.length) {

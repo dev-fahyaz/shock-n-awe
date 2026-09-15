@@ -1,8 +1,8 @@
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
+import { setupAuthorized, setupDeny, setupFail } from 'scene/setup/guard';
 import {
-  StoreError,
   create,
   getById,
   isRemoteSource,
@@ -10,36 +10,13 @@ import {
   remove,
   update,
 } from 'scene/source/store';
+import { isSupabaseConfigured } from 'scene/source/supabase';
 import type { SceneConfig } from 'scene/types';
 
 /**
- * Scene anatomy CRUD.
- *
- * Local JSON for now. Gated by SCENE_SETUP_SECRET; if that is unset, writes
- * are allowed only outside production.
+ * Scene anatomy CRUD. Writes go to sna_scenes. Gated by SCENE_SETUP_SECRET;
+ * if that is unset, writes are allowed only outside production.
  */
-
-function authorized(req: Request): boolean {
-  const secret = process.env.SCENE_SETUP_SECRET;
-  if (!secret) return process.env.NODE_ENV !== 'production';
-  const provided = req.headers.get('x-scene-secret') ?? '';
-  return provided.length === secret.length && provided === secret;
-}
-
-function deny() {
-  return NextResponse.json({ ok: false, error: 'unauthorised' }, { status: 401 });
-}
-
-function fail(err: unknown) {
-  if (err instanceof StoreError) {
-    return NextResponse.json(
-      { ok: false, error: err.message },
-      { status: err.status },
-    );
-  }
-  const message = err instanceof Error ? err.message : 'unknown error';
-  return NextResponse.json({ ok: false, error: message }, { status: 500 });
-}
 
 function touch(scene: SceneConfig, extra: string[] = []) {
   const slugs = [
@@ -53,8 +30,28 @@ function touch(scene: SceneConfig, extra: string[] = []) {
   revalidatePath(`/setup/${scene.id}`);
 }
 
+function needSupabase() {
+  if (isRemoteSource()) {
+    return NextResponse.json(
+      { ok: false, error: 'cannot write to a remote scene source' },
+      { status: 501 },
+    );
+  }
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.',
+      },
+      { status: 503 },
+    );
+  }
+  return null;
+}
+
 export async function GET(req: Request) {
-  if (!authorized(req)) return deny();
+  if (!setupAuthorized(req)) return setupDeny();
 
   try {
     const id = new URL(req.url).searchParams.get('id');
@@ -67,18 +64,14 @@ export async function GET(req: Request) {
     }
     return NextResponse.json({ ok: true, scenes: await list() });
   } catch (err) {
-    return fail(err);
+    return setupFail(err);
   }
 }
 
 export async function POST(req: Request) {
-  if (!authorized(req)) return deny();
-  if (isRemoteSource()) {
-    return NextResponse.json(
-      { ok: false, error: 'cannot write to a remote scene source' },
-      { status: 501 },
-    );
-  }
+  if (!setupAuthorized(req)) return setupDeny();
+  const blocked = needSupabase();
+  if (blocked) return blocked;
 
   try {
     let body: Partial<SceneConfig> = {};
@@ -88,12 +81,14 @@ export async function POST(req: Request) {
     touch(scene);
     return NextResponse.json({ ok: true, scene }, { status: 201 });
   } catch (err) {
-    return fail(err);
+    return setupFail(err);
   }
 }
 
 export async function PUT(req: Request) {
-  if (!authorized(req)) return deny();
+  if (!setupAuthorized(req)) return setupDeny();
+  const blocked = needSupabase();
+  if (blocked) return blocked;
 
   try {
     const body = (await req.json()) as SceneConfig;
@@ -104,12 +99,14 @@ export async function PUT(req: Request) {
     touch(scene);
     return NextResponse.json({ ok: true, scene });
   } catch (err) {
-    return fail(err);
+    return setupFail(err);
   }
 }
 
 export async function DELETE(req: Request) {
-  if (!authorized(req)) return deny();
+  if (!setupAuthorized(req)) return setupDeny();
+  const blocked = needSupabase();
+  if (blocked) return blocked;
 
   try {
     const id = new URL(req.url).searchParams.get('id');
@@ -121,6 +118,6 @@ export async function DELETE(req: Request) {
     revalidatePath(`/setup/${id}`);
     return NextResponse.json({ ok: true, scene });
   } catch (err) {
-    return fail(err);
+    return setupFail(err);
   }
 }

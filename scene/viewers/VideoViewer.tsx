@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { isEmbeddable } from '../schema';
-import { resolveMedia } from '../media';
+import { resolveMedia, withEmbedAutoplay } from '../media';
 import { track } from '../track';
 import type { ViewerProps } from './types';
 import { ExternalFallback } from './ExternalFallback';
@@ -22,11 +22,23 @@ import { ExternalFallback } from './ExternalFallback';
  */
 export default function VideoViewer({ item, sceneId }: ViewerProps) {
   const src = item.kind === 'video' ? item.src : undefined;
+  const muted = item.kind === 'video' ? Boolean(item.autoplayMuted) : false;
   const media = useMemo(() => (src ? resolveMedia(src) : null), [src]);
   const ref = useRef<HTMLVideoElement>(null);
   const [sent, setSent] = useState<Set<number>>(new Set());
 
   useEffect(() => setSent(new Set()), [src]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.muted = muted;
+    const play = () => el.play().catch(() => {
+      el.muted = true;
+      return el.play().catch(() => undefined);
+    });
+    void play();
+  }, [src, muted]);
 
   if (item.kind !== 'video' || !media) return null;
 
@@ -43,7 +55,7 @@ export default function VideoViewer({ item, sceneId }: ViewerProps) {
     }
     return (
       <iframe
-        src={media.embedUrl}
+        src={withEmbedAutoplay(media.embedUrl, true)}
         title={item.label}
         className="size-full border-0 bg-black"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
@@ -77,6 +89,8 @@ export default function VideoViewer({ item, sceneId }: ViewerProps) {
       src={media.url}
       poster={item.poster ?? media.posterUrl}
       controls
+      autoPlay
+      muted={muted}
       playsInline
       preload="metadata"
       onTimeUpdate={onTimeUpdate}

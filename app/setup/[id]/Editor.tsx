@@ -6,6 +6,7 @@ import {
   useCallback,
   useRef,
   useState,
+  type ChangeEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
@@ -16,6 +17,9 @@ import {
   rememberSetupSecret,
   saveScene,
   sceneUrl,
+  uploadSceneMedia,
+  urlFoldTitle,
+  withBrandRoute,
   type BrandInfo,
 } from 'scene/setup/client';
 import { resolvePlaced } from 'scene/source/resolve';
@@ -35,6 +39,70 @@ const FIELD =
 const LABEL = 'mb-1 block text-xs font-medium text-muted-foreground';
 const FOLD_SUMMARY =
   'cursor-pointer text-sm font-semibold uppercase tracking-wider text-muted-foreground';
+
+function FileField({
+  sceneId,
+  kind,
+  label,
+  value,
+  onUploaded,
+}: {
+  sceneId: string;
+  kind: 'image' | 'pdf' | 'file';
+  label: string;
+  value?: string;
+  onUploaded: (url: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onPick(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const uploadKind =
+        kind === 'file'
+          ? file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+            ? 'pdf'
+            : 'image'
+          : kind;
+      const { url } = await uploadSceneMedia(sceneId, uploadKind, file);
+      onUploaded(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'upload failed');
+    } finally {
+      setBusy(false);
+      e.target.value = '';
+    }
+  }
+
+  const accept =
+    kind === 'pdf'
+      ? 'application/pdf'
+      : kind === 'image'
+        ? 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml'
+        : 'application/pdf,image/jpeg,image/png,image/webp,image/gif,image/svg+xml';
+
+  return (
+    <div>
+      <label className={LABEL}>{label}</label>
+      {value ? (
+        <p className="mb-1 truncate font-mono text-[11px] text-muted-foreground">{value}</p>
+      ) : null}
+      <input
+        type="file"
+        accept={accept}
+        disabled={busy}
+        className="block w-full text-xs text-muted-foreground file:mr-2 file:rounded-md file:border file:bg-background file:px-2 file:py-1"
+        onChange={onPick}
+      />
+      {busy && <p className="mt-1 text-xs text-muted-foreground">Uploading…</p>}
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
 
 function Fold({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -320,7 +388,7 @@ function UrlSection({
   }
 
   return (
-    <Fold title="URL">
+    <Fold title={urlFoldTitle(scene, brands)}>
       <div className="space-y-4 rounded-xl border bg-card p-4">
         {brands.map(brand => {
           const route = scene.routes.find(r => r.site === brand.key);
@@ -330,9 +398,7 @@ function UrlSection({
                 <input
                   type="checkbox"
                   checked={Boolean(route)}
-                  onChange={e =>
-                    setRoute(brand.key, e.target.checked ? { site: brand.key } : null)
-                  }
+                  onChange={e => onChange(withBrandRoute(scene, brand.key, e.target.checked))}
                 />
                 {brand.name}
               </label>
@@ -474,29 +540,26 @@ function AnatomySection({
             </select>
           </div>
         </div>
-        <div>
-          <label className={LABEL}>Background src</label>
-          <input
-            className={FIELD}
-            value={bg?.src ?? ''}
-            onChange={e =>
-              onChange({
-                ...scene,
-                stage: {
-                  ...scene.stage,
-                  background: e.target.value
-                    ? {
-                        src: e.target.value,
-                        width: bg?.width ?? 1536,
-                        height: bg?.height ?? 1024,
-                        alt: bg?.alt || scene.audience.nameplate,
-                      }
-                    : undefined,
+        <FileField
+          sceneId={scene.id}
+          kind="image"
+          label="Background"
+          value={bg?.src}
+          onUploaded={src =>
+            onChange({
+              ...scene,
+              stage: {
+                ...scene.stage,
+                background: {
+                  src,
+                  width: bg?.width ?? 1536,
+                  height: bg?.height ?? 1024,
+                  alt: bg?.alt || scene.audience.nameplate,
                 },
-              })
-            }
-          />
-        </div>
+              },
+            })
+          }
+        />
         {bg && (
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -642,6 +705,7 @@ function ItemsSection({
 
       {item && index >= 0 && (
         <ItemFields
+          sceneId={scene.id}
           item={item}
           all={all}
           onChange={next => onUpdate(index, next)}
@@ -653,11 +717,13 @@ function ItemsSection({
 }
 
 function ItemFields({
+  sceneId,
   item,
   all,
   onChange,
   onRemove,
 }: {
+  sceneId: string;
   item: Placed;
   all: { id: string; label: string }[];
   onChange: (item: Placed) => void;
@@ -766,12 +832,35 @@ function ItemFields({
           </div>
         </>
       )}
-      {(item.kind === 'pdf' ||
-        item.kind === 'audio' ||
-        item.kind === 'embed' ||
-        item.kind === 'auto' ||
-        item.kind === 'video' ||
-        item.kind === 'image') && (
+      {(item.kind === 'pdf' || item.kind === 'image') && (
+        <FileField
+          sceneId={sceneId}
+          kind={item.kind}
+          label={item.kind === 'pdf' ? 'PDF' : 'Image'}
+          value={item.src}
+          onUploaded={src => onChange({ ...item, src })}
+        />
+      )}
+      {item.kind === 'auto' && (
+        <>
+          <FileField
+            sceneId={sceneId}
+            kind="file"
+            label="File (PDF or image)"
+            value={item.src}
+            onUploaded={src => onChange({ ...item, src })}
+          />
+          <div>
+            <label className={LABEL}>Or URL</label>
+            <input
+              className={FIELD}
+              value={item.src}
+              onChange={e => onChange({ ...item, src: e.target.value })}
+            />
+          </div>
+        </>
+      )}
+      {(item.kind === 'audio' || item.kind === 'embed' || item.kind === 'video') && (
         <div>
           <label className={LABEL}>Src</label>
           <input
@@ -782,14 +871,13 @@ function ItemFields({
         </div>
       )}
       {item.kind === 'video' && (
-        <div>
-          <label className={LABEL}>Poster</label>
-          <input
-            className={FIELD}
-            value={item.poster ?? ''}
-            onChange={e => onChange({ ...item, poster: e.target.value || undefined })}
-          />
-        </div>
+        <FileField
+          sceneId={sceneId}
+          kind="image"
+          label="Poster"
+          value={item.poster}
+          onUploaded={poster => onChange({ ...item, poster })}
+        />
       )}
       {item.kind === 'image' && (
         <div>
@@ -813,19 +901,15 @@ function ItemFields({
       )}
       {item.kind === 'card' && (
         <>
-          <div>
-            <label className={LABEL}>Photo</label>
-            <input
-              className={FIELD}
-              value={item.person.photo ?? ''}
-              onChange={e =>
-                onChange({
-                  ...item,
-                  person: { ...item.person, photo: e.target.value || undefined },
-                })
-              }
-            />
-          </div>
+          <FileField
+            sceneId={sceneId}
+            kind="image"
+            label="Photo"
+            value={item.person.photo}
+            onUploaded={photo =>
+              onChange({ ...item, person: { ...item.person, photo } })
+            }
+          />
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className={LABEL}>Name</label>

@@ -27,7 +27,7 @@ export default async function SetupPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Scenes</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Anatomy, URLs and items. Stored locally until a database lands.
+            Assign each scene to SAT and Aspire. Stored in Supabase.
           </p>
         </div>
         <Button asChild>

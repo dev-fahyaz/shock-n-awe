@@ -217,6 +217,35 @@ function youtube(id: string, u: URL): ProviderMatch {
   };
 }
 
+/** Provider iframes only autoplay with these params (and usually muted). */
+export function withEmbedAutoplay(embedUrl: string, muted = true): string {
+  try {
+    const u = new URL(embedUrl);
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    if (host.endsWith('youtube.com') || host === 'youtube-nocookie.com') {
+      u.searchParams.set('autoplay', '1');
+      if (muted) u.searchParams.set('mute', '1');
+    } else if (host.endsWith('vimeo.com')) {
+      u.searchParams.set('autoplay', '1');
+      if (muted) u.searchParams.set('muted', '1');
+    } else if (host.endsWith('loom.com')) {
+      u.searchParams.set('autoplay', 'true');
+      u.searchParams.set('mute_video', muted ? 'true' : 'false');
+    } else if (host.endsWith('wistia.net') || host.endsWith('wistia.com')) {
+      u.searchParams.set('autoPlay', 'true');
+      if (muted) u.searchParams.set('muted', 'true');
+    } else if (host.endsWith('dailymotion.com')) {
+      u.searchParams.set('autoplay', '1');
+      if (muted) u.searchParams.set('mute', '1');
+    } else {
+      u.searchParams.set('autoplay', '1');
+    }
+    return u.toString();
+  } catch {
+    return embedUrl;
+  }
+}
+
 /* ------------------------------------------------------------------ *
  * Entry point
  * ------------------------------------------------------------------ */
