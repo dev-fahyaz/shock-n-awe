@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { cn } from 'components/ui/utils';
 import { itemKindForMedia, resolveMedia } from './media';
+import { ProviderFrame } from './ProviderFrame';
 import { isSafeUrl } from './schema';
 import type { LetterItem, ResolvedItem } from './types';
 import { letterText } from './letterTokens';
@@ -47,7 +48,9 @@ function Face({ item }: { item: ResolvedItem }) {
     case 'letter':
       return <LetterMini item={spec.item} />;
     case 'video':
-      return <VideoMini src={spec.src} poster={spec.poster} />;
+      return (
+        <VideoMini src={spec.src} embedUrl={spec.embedUrl} poster={spec.poster} />
+      );
     case 'pdf':
       return <PdfMini src={spec.src} />;
     case 'image':
@@ -73,7 +76,7 @@ function Face({ item }: { item: ResolvedItem }) {
 
 type FaceSpec =
   | { type: 'letter'; item: LetterItem }
-  | { type: 'video'; src?: string; poster?: string }
+  | { type: 'video'; src?: string; embedUrl?: string; poster?: string }
   | { type: 'pdf'; src: string }
   | { type: 'image'; src: string }
   | { type: 'shot'; href: string };
@@ -94,6 +97,7 @@ function videoFace(src: string, poster?: string): FaceSpec {
   return {
     type: 'video',
     src: media.embedUrl ? undefined : media.url,
+    embedUrl: media.embedUrl,
     poster: poster ?? media.posterUrl,
   };
 }
@@ -196,7 +200,15 @@ function LetterMini({ item }: { item: LetterItem }) {
   );
 }
 
-function VideoMini({ src, poster }: { src?: string; poster?: string }) {
+function VideoMini({
+  src,
+  embedUrl,
+  poster,
+}: {
+  src?: string;
+  embedUrl?: string;
+  poster?: string;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -217,6 +229,17 @@ function VideoMini({ src, poster }: { src?: string; poster?: string }) {
       el.pause();
     };
   }, [src]);
+
+  if (embedUrl) {
+    return (
+      <ProviderFrame
+        embedUrl={embedUrl}
+        title=""
+        mini
+        className="pointer-events-none absolute inset-0 size-full overflow-hidden"
+      />
+    );
+  }
 
   if (!src) {
     if (!poster) return null;

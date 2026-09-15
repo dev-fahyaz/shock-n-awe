@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { setupAuthorized, setupDeny, setupFail } from 'scene/setup/guard';
 import { list } from 'scene/source/store';
 import {
+  MEDIA_KINDS,
   collectStorageRefs,
   deleteMediaRows,
   isSupabaseConfigured,
@@ -10,7 +11,7 @@ import {
   listMediaRows,
   mediaRefKey,
   removeObjects,
-  type MediaKind,
+  bucketForKind,
 } from 'scene/source/supabase';
 
 export async function POST(req: Request) {
@@ -34,9 +35,9 @@ export async function POST(req: Request) {
     await deleteMediaRows(unused.map(r => r.id));
 
     let files = 0;
-    for (const kind of ['image', 'pdf'] as MediaKind[]) {
+    for (const kind of MEDIA_KINDS) {
       const paths = await listBucketPaths(kind);
-      const drop = paths.filter(path => !refs.has(`${kind === 'pdf' ? 'scene-docs' : 'scene-images'}/${path}`));
+      const drop = paths.filter(path => !refs.has(`${bucketForKind(kind)}/${path}`));
       await removeObjects(kind, drop);
       files += drop.length;
     }

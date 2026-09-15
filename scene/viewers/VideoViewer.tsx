@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { isEmbeddable } from '../schema';
-import { resolveMedia, withEmbedAutoplay } from '../media';
+import { resolveMedia } from '../media';
+import { ProviderFrame } from '../ProviderFrame';
 import { track } from '../track';
 import type { ViewerProps } from './types';
 import { ExternalFallback } from './ExternalFallback';
@@ -54,13 +55,10 @@ export default function VideoViewer({ item, sceneId }: ViewerProps) {
       );
     }
     return (
-      <iframe
-        src={withEmbedAutoplay(media.embedUrl, true)}
+      <ProviderFrame
+        embedUrl={media.embedUrl}
         title={item.label}
-        className="size-full border-0 bg-black"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowFullScreen
-        referrerPolicy="strict-origin-when-cross-origin"
+        className="size-full bg-black"
       />
     );
   }

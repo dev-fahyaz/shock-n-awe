@@ -31,13 +31,13 @@ npm run dev                    # http://localhost:3000
 
 ```
   Setup (this repo) ──writes──► Supabase Postgres (scene JSON, brand routes)
-                         └──► Storage buckets (images, PDFs only)
+                         └──► Storage buckets (images, PDFs, video, audio)
 
   SAT Next.js  ──fetch helper──► Supabase get_live_post(asat, slug)
   Aspire Next.js ──fetch helper──► Supabase get_live_post(aspire, slug)
                          └── if live ──► this engine /{slug}
 
-  This engine ──reads──► sna_scenes (JSON is seed-only, never written back)
+  This engine ──reads──► sna_scenes + Storage
 ```
 
 ```mermaid
@@ -89,7 +89,7 @@ In `/setup`, each row has **SAT** and **Aspire** chips (`off` / `draft` / `live`
 - New scenes start as SAT draft. Assignment is explicit.
 - When both are live, SAT stays canonical; Aspire is typically `indexable: false`.
 
-Video items keep an **external `src`**. PDF, image, card photo, and stage background are file uploads into Storage. Do not upload video.
+Video files upload to Storage (50 MB cap). YouTube / Vimeo / Loom stay an **https embed URL** and play on the desk (muted loop) and in the modal. PDF, image, audio, poster, background, and downloads are file uploads — no `/scene/...` path box in Setup.
 
 On `/setup`, **Remove unused files** deletes `sna_media` rows and bucket objects that no scene config still points at.
 
@@ -97,22 +97,22 @@ On `/setup`, **Remove unused files** deletes `sna_media` rows and bucket objects
 
 ## Supabase
 
-Required for Setup writes. Without env vars the engine can still **read** a local JSON seed; create/update/delete and uploads return an error until keys are set.
+Required for Setup writes and for serving live scenes. Without env vars the catalog is empty.
 
 1. Create a project.
-2. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor (`sna_scenes`, `sna_media` with `scene_id` FK, `get_live_post` RPC, public buckets `scene-images` and `scene-docs`).
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the SQL editor (`sna_scenes`, `sna_media` with `scene_id` FK, `get_live_post` RPC, public buckets `scene-images`, `scene-docs`, `scene-video`, `scene-audio`).
 3. Put the project **URL** and **service role** key (server only) in `.env.local`.
 
 | Layer | Holds |
 |---|---|
 | Postgres `sna_scenes` | Full `SceneConfig` jsonb, including text and brand routes |
-| Postgres `sna_media` | Image/PDF rows keyed by `scene_id` (cascade on scene delete) |
-| Storage | Image and PDF bytes (`scene-images`, `scene-docs`) |
-| Not stored | Video files — link only. `content/scenes.json` is never written by Setup |
+| Postgres `sna_media` | Image/PDF/video/audio rows keyed by `scene_id` (cascade on scene delete) |
+| Storage | File bytes (`scene-images`, `scene-docs`, `scene-video`, `scene-audio`) |
+| Not in Storage | YouTube/Vimeo URLs stay embeds |
 
 `get_live_post(site, slug)` returns the live scene `config` plus its `media[]`. Pass `slug` as null to list every live post for a site. Engine, Setup, and the host helper all use the service role — drafts never go to the browser.
 
-Free-tier caps (public pricing): 500 MB database, 1 GB file storage, **50 MB max upload**. Dummy PDFs fit. Large video was never going to live here.
+Free-tier caps (public pricing): 500 MB database, 1 GB file storage, **50 MB max upload**. Keep uploaded video small.
 
 ---
 
@@ -202,26 +202,23 @@ Shock-and-Awe/
 │   ├── viewers/              pdf · embed built; rest are Phase 3
 │   ├── library/items.ts      shared item definitions
 │   ├── configs/              scene records + validation
-│   ├── source/               SceneSource: JSON → Supabase
+│   ├── source/               SceneSource: Supabase
 │   └── host/                 fetch helper for SAT and Aspire
 ├── supabase/schema.sql       sna_scenes, sna_media FK, get_live_post, buckets
 ├── scripts/
 │   ├── reserved-slugs.mjs    generates the collision guard list
 │   └── validate-scenes.mjs   CI check
-└── public/scene/
-    ├── stages/               background artwork
-    └── shared/               documents, video, audio reused across scenes
+└── public/scene/stages/      optional local stage art for compiled examples
 ```
 
 ---
 
 ## Adding a scene
 
-1. Drop the stage artwork in `public/scene/stages/`.
-2. Create `scene/configs/<name>.ts` (copy `nyc-desk.ts`).
-3. Register it in `scene/configs/index.ts`.
-4. Run `npm run dev` and open `/<your-slug>?edit=1` to see the hotspot boxes while you position them.
-5. `npm run validate:scenes` before committing.
+1. In `/setup`, add a scene and assign SAT / Aspire.
+2. Upload PDFs, images, audio, and video files (or paste a YouTube URL).
+3. Open `/{slug}?setup=<id>` to position hotspots.
+4. `npm run validate:scenes` before committing compiled config examples.
 
 ### Which props get a hotspot
 
@@ -308,7 +305,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Setup upserts `sna_scenes` only. If the table is empty, JSON in `content/scenes.json` (or compiled configs) is imported once. There is no write-back to disk.
+Setup upserts `sna_scenes` only. Files go to Storage. There is no local JSON catalog.
 
 Publishing goes live in seconds via `/api/scene/revalidate` (see `.env.example`).
 

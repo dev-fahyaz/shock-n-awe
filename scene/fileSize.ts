@@ -14,12 +14,12 @@ export function formatBytes(n: number): string {
   return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
 }
 
-/** Actual size of a same-origin file, or null while unknown / remote. */
+/** Size of a Storage object, or null while unknown / not a file URL. */
 export function useHrefSize(href?: string): string | null {
   const [label, setLabel] = useState(() => (href ? cache.get(href) ?? null : null));
 
   useEffect(() => {
-    if (!href || !href.startsWith('/') || href.startsWith('//')) {
+    if (!href || !href.includes('/storage/v1/object/')) {
       setLabel(null);
       return;
     }

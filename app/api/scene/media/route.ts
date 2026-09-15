@@ -20,13 +20,36 @@ const IMAGE_TYPES = new Set([
   'image/gif',
   'image/svg+xml',
 ]);
+const VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg']);
+const AUDIO_TYPES = new Set([
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/mp4',
+  'audio/aac',
+  'audio/ogg',
+]);
 
 function kindFromFile(file: File, requested?: string): MediaKind | null {
   if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) return 'pdf';
+  if (VIDEO_TYPES.has(file.type) || /\.(mp4|webm|mov|ogg|m4v)$/i.test(file.name)) {
+    return 'video';
+  }
+  if (AUDIO_TYPES.has(file.type) || /\.(mp3|wav|m4a|aac|ogg)$/i.test(file.name)) {
+    return 'audio';
+  }
   if (IMAGE_TYPES.has(file.type) || /\.(jpe?g|png|webp|gif|svg)$/i.test(file.name)) {
     return 'image';
   }
-  if (requested === 'pdf' || requested === 'image') return requested;
+  if (
+    requested === 'pdf' ||
+    requested === 'image' ||
+    requested === 'video' ||
+    requested === 'audio'
+  ) {
+    return requested;
+  }
   return null;
 }
 
@@ -77,14 +100,14 @@ export async function POST(req: Request) {
     const kind = kindFromFile(file, requested);
     if (!kind) {
       return NextResponse.json(
-        { ok: false, error: 'upload images or PDFs only; video stays an external URL' },
+        { ok: false, error: 'upload an image, PDF, video, or audio file' },
         { status: 400 },
       );
     }
 
     const id = `m-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
     const path = `${sceneId}/${id}-${safeName(file.name)}`;
-    const mime = file.type || (kind === 'pdf' ? 'application/pdf' : 'application/octet-stream');
+    const mime = file.type || 'application/octet-stream';
     const buffer = Buffer.from(await file.arrayBuffer());
 
     try {

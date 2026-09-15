@@ -9,8 +9,7 @@ import type { SceneSource } from './types';
 import type { ResolvedScene, SiteKey } from '../types';
 
 /**
- * SceneSource when Supabase env is set. Reads go through store.ts, which
- * reads sna_scenes through store.ts. Empty table is seeded once from JSON.
+ * Reads sna_scenes. Empty table means no live scenes yet.
  */
 export const supabaseSource: SceneSource = {
   list: storeList,

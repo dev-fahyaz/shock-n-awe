@@ -61,7 +61,7 @@ export async function deleteScene(id: string): Promise<void> {
 
 export async function uploadSceneMedia(
   sceneId: string,
-  kind: 'image' | 'pdf',
+  kind: 'image' | 'pdf' | 'video' | 'audio',
   file: File,
 ): Promise<{ url: string; id: string }> {
   const body = new FormData();

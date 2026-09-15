@@ -10,10 +10,7 @@ import {
 import type { SceneSource } from './types';
 
 /**
- * Runtime scene source — JSON file or HTTP.
- *
- * Local files go through `store.ts` (read-only seed). An `https://` SCENE_SOURCE_URL
- * is fetched as plain JSON. Setup writes never go back to JSON.
+ * Optional HTTPS catalog. Local JSON files are not a media source.
  */
 
 async function loadRemote(): Promise<SceneConfig[]> {

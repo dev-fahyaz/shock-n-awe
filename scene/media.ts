@@ -217,26 +217,51 @@ function youtube(id: string, u: URL): ProviderMatch {
   };
 }
 
-/** Provider iframes only autoplay with these params (and usually muted). */
-export function withEmbedAutoplay(embedUrl: string, muted = true): string {
+/** Provider iframes: autoplay (usually muted). Loop/playlist for desk miniatures. */
+export function withEmbedPlayback(
+  embedUrl: string,
+  opts: { muted?: boolean; loop?: boolean; controls?: boolean } = {},
+): string {
+  const muted = opts.muted ?? true;
+  const loop = opts.loop ?? false;
+  const controls = opts.controls ?? true;
   try {
     const u = new URL(embedUrl);
     const host = u.hostname.replace(/^www\./, '').toLowerCase();
     if (host.endsWith('youtube.com') || host === 'youtube-nocookie.com') {
+      const id = u.pathname.match(/\/embed\/([^/]+)/)?.[1];
       u.searchParams.set('autoplay', '1');
+      u.searchParams.set('playsinline', '1');
+      u.searchParams.set('enablejsapi', '1');
+      u.searchParams.set('rel', '0');
       if (muted) u.searchParams.set('mute', '1');
+      if (!controls) u.searchParams.set('controls', '0');
+      if (loop && id) {
+        u.searchParams.set('loop', '1');
+        u.searchParams.set('playlist', id);
+      }
     } else if (host.endsWith('vimeo.com')) {
       u.searchParams.set('autoplay', '1');
+      u.searchParams.set('playsinline', '1');
       if (muted) u.searchParams.set('muted', '1');
+      if (loop) u.searchParams.set('loop', '1');
+      if (!controls) u.searchParams.set('background', '1');
     } else if (host.endsWith('loom.com')) {
       u.searchParams.set('autoplay', 'true');
-      u.searchParams.set('mute_video', muted ? 'true' : 'false');
+      u.searchParams.set('hide_share', 'true');
+      if (muted) u.searchParams.set('mute_video', 'true');
+      if (!controls) u.searchParams.set('hide_owner', 'true');
     } else if (host.endsWith('wistia.net') || host.endsWith('wistia.com')) {
       u.searchParams.set('autoPlay', 'true');
+      u.searchParams.set('playsinline', 'true');
       if (muted) u.searchParams.set('muted', 'true');
+      if (!controls) u.searchParams.set('controlsVisibleOnLoad', 'false');
+      if (loop) u.searchParams.set('endVideoBehavior', 'loop');
     } else if (host.endsWith('dailymotion.com')) {
       u.searchParams.set('autoplay', '1');
       if (muted) u.searchParams.set('mute', '1');
+      if (!controls) u.searchParams.set('controls', '0');
+      if (loop) u.searchParams.set('loop', '1');
     } else {
       u.searchParams.set('autoplay', '1');
     }
@@ -244,6 +269,10 @@ export function withEmbedAutoplay(embedUrl: string, muted = true): string {
   } catch {
     return embedUrl;
   }
+}
+
+export function withEmbedAutoplay(embedUrl: string, muted = true): string {
+  return withEmbedPlayback(embedUrl, { muted, controls: true, loop: false });
 }
 
 /* ------------------------------------------------------------------ *
@@ -260,8 +289,7 @@ function extOf(pathname: string): string | undefined {
 /**
  * Resolve any URL to something renderable.
  *
- * Accepts absolute URLs and app-relative paths (`/scene/shared/x.pdf`).
- * Never throws.
+ * Accepts Storage public URLs and https provider links. Never throws.
  */
 export function resolveMedia(input: string, origin?: string): ResolvedMedia {
   const raw = (input ?? '').trim();

@@ -7,7 +7,7 @@ import type { SceneSource } from './types';
  * Where scene config comes from.
  *
  * Supabase when NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY are set.
- * Otherwise jsonSource (local JSON, or HTTP SCENE_SOURCE_URL).
+ * Otherwise no live catalog (Setup cannot write either).
  */
 
 let cached: SceneSource | null = null;

@@ -14,9 +14,13 @@ export const TABLE_SCENES = 'sna_scenes';
 export const TABLE_MEDIA = 'sna_media';
 export const BUCKET_IMAGES = 'scene-images';
 export const BUCKET_DOCS = 'scene-docs';
+export const BUCKET_VIDEO = 'scene-video';
+export const BUCKET_AUDIO = 'scene-audio';
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
-export type MediaKind = 'image' | 'pdf';
+export type MediaKind = 'image' | 'pdf' | 'video' | 'audio';
+
+export const MEDIA_KINDS: MediaKind[] = ['image', 'pdf', 'video', 'audio'];
 
 export type MediaRow = {
   id: string;
@@ -54,7 +58,16 @@ function admin(): SupabaseClient {
 }
 
 export function bucketForKind(kind: MediaKind): string {
-  return kind === 'pdf' ? BUCKET_DOCS : BUCKET_IMAGES;
+  switch (kind) {
+    case 'pdf':
+      return BUCKET_DOCS;
+    case 'video':
+      return BUCKET_VIDEO;
+    case 'audio':
+      return BUCKET_AUDIO;
+    default:
+      return BUCKET_IMAGES;
+  }
 }
 
 export function publicMediaUrl(kind: MediaKind, path: string): string {
@@ -155,7 +168,7 @@ export async function listBucketPaths(kind: MediaKind): Promise<string[]> {
 }
 
 const STORAGE_RE =
-  /storage\/v1\/object\/public\/(scene-images|scene-docs)\/([^\s"'?]+)/g;
+  /storage\/v1\/object\/public\/(scene-images|scene-docs|scene-video|scene-audio)\/([^\s"'?]+)/g;
 
 /** Collect Storage object keys referenced by scene configs. */
 export function collectStorageRefs(configs: unknown[]): Set<string> {

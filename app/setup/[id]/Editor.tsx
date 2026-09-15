@@ -48,10 +48,10 @@ function FileField({
   onUploaded,
 }: {
   sceneId: string;
-  kind: 'image' | 'pdf' | 'file';
+  kind: 'image' | 'pdf' | 'video' | 'audio' | 'file';
   label: string;
   value?: string;
-  onUploaded: (url: string) => void;
+  onUploaded: (url: string, file: File) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,12 +64,16 @@ function FileField({
     try {
       const uploadKind =
         kind === 'file'
-          ? file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+          ? /\.pdf$/i.test(file.name) || file.type === 'application/pdf'
             ? 'pdf'
-            : 'image'
+            : /^video\//.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name)
+              ? 'video'
+              : /^audio\//.test(file.type) || /\.(mp3|wav|m4a|aac)$/i.test(file.name)
+                ? 'audio'
+                : 'image'
           : kind;
       const { url } = await uploadSceneMedia(sceneId, uploadKind, file);
-      onUploaded(url);
+      onUploaded(url, file);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'upload failed');
     } finally {
@@ -83,7 +87,11 @@ function FileField({
       ? 'application/pdf'
       : kind === 'image'
         ? 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml'
-        : 'application/pdf,image/jpeg,image/png,image/webp,image/gif,image/svg+xml';
+        : kind === 'video'
+          ? 'video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov'
+          : kind === 'audio'
+            ? 'audio/mpeg,audio/wav,audio/mp4,.mp3,.wav,.m4a'
+            : 'application/pdf,image/jpeg,image/png,image/webp,image/gif,image/svg+xml,video/mp4,video/webm,audio/mpeg,.mp4,.webm,.mp3,.wav,.m4a,.pdf';
 
   return (
     <div>
@@ -842,42 +850,69 @@ function ItemFields({
         />
       )}
       {item.kind === 'auto' && (
-        <>
-          <FileField
-            sceneId={sceneId}
-            kind="file"
-            label="File (PDF or image)"
-            value={item.src}
-            onUploaded={src => onChange({ ...item, src })}
-          />
-          <div>
-            <label className={LABEL}>Or URL</label>
-            <input
-              className={FIELD}
-              value={item.src}
-              onChange={e => onChange({ ...item, src: e.target.value })}
-            />
-          </div>
-        </>
+        <FileField
+          sceneId={sceneId}
+          kind="file"
+          label="File"
+          value={item.src}
+          onUploaded={src => onChange({ ...item, src })}
+        />
       )}
-      {(item.kind === 'audio' || item.kind === 'embed' || item.kind === 'video') && (
+      {item.kind === 'audio' && (
+        <FileField
+          sceneId={sceneId}
+          kind="audio"
+          label="Audio"
+          value={item.src}
+          onUploaded={src => onChange({ ...item, src })}
+        />
+      )}
+      {item.kind === 'embed' && (
         <div>
-          <label className={LABEL}>Src</label>
+          <label className={LABEL}>Page URL</label>
           <input
             className={FIELD}
             value={item.src}
+            placeholder="https://"
             onChange={e => onChange({ ...item, src: e.target.value })}
           />
         </div>
       )}
       {item.kind === 'video' && (
-        <FileField
-          sceneId={sceneId}
-          kind="image"
-          label="Poster"
-          value={item.poster}
-          onUploaded={poster => onChange({ ...item, poster })}
-        />
+        <>
+          <FileField
+            sceneId={sceneId}
+            kind="video"
+            label="Video file"
+            value={item.src}
+            onUploaded={src => onChange({ ...item, src })}
+          />
+          <div>
+            <label className={LABEL}>Or YouTube / Vimeo URL</label>
+            <input
+              className={FIELD}
+              value={
+                /^https?:\/\//i.test(item.src) && !item.src.includes('/storage/v1/')
+                  ? item.src
+                  : ''
+              }
+              placeholder="https://www.youtube.com/watch?v="
+              onChange={e => {
+                const next = e.target.value.trim();
+                if (!next || /^https?:\/\//i.test(next)) {
+                  onChange({ ...item, src: next });
+                }
+              }}
+            />
+          </div>
+          <FileField
+            sceneId={sceneId}
+            kind="image"
+            label="Poster"
+            value={item.poster}
+            onUploaded={poster => onChange({ ...item, poster })}
+          />
+        </>
       )}
       {item.kind === 'image' && (
         <div>
@@ -1047,19 +1082,18 @@ function ItemFields({
         </div>
       )}
       {(item.kind === 'download' || item.download) && (
-        <div>
-          <label className={LABEL}>Download href</label>
-          <input
-            className={FIELD}
-            value={item.download?.href ?? ''}
-            onChange={e =>
-              onChange({
-                ...item,
-                download: { href: e.target.value || '/', filename: item.download?.filename },
-              })
-            }
-          />
-        </div>
+        <FileField
+          sceneId={sceneId}
+          kind="file"
+          label="Download file"
+          value={item.download?.href}
+          onUploaded={(href, file) =>
+            onChange({
+              ...item,
+              download: { href, filename: file.name },
+            })
+          }
+        />
       )}
       <Button variant="ghost" size="sm" onClick={onRemove}>
         Remove item

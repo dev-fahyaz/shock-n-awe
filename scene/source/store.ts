@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { parseScenes, sceneConfigSchema, type ValidatedScene } from '../schema';
+import { sceneConfigSchema, type ValidatedScene } from '../schema';
 import type { SceneConfig, SceneRoute, SiteKey } from '../types';
 import {
   isSupabaseConfigured,
@@ -10,14 +10,10 @@ import {
 } from './supabase';
 
 /**
- * Scene store.
- *
- * Setup writes go to sna_scenes only. content/scenes.json is a one-time seed
- * when the table is empty — never written back. An `https://` SCENE_SOURCE_URL
- * is treated as a remote CMS and stays read-only.
+ * Scene store. Live configs are sna_scenes in Supabase. No local JSON
+ * catalog and no import of compiled `/scene/shared/` files.
  */
 
-const DEFAULT_FILE = 'content/scenes.json';
 const ALWAYS_RESERVED = ['api', 'setup', 'scene', 'images', 'assets', 'static'];
 
 export class StoreError extends Error {
@@ -28,12 +24,6 @@ export class StoreError extends Error {
     super(message);
     this.name = 'StoreError';
   }
-}
-
-export function storePath(): string {
-  const src = process.env.SCENE_SOURCE_URL;
-  if (src && !/^https?:\/\//i.test(src)) return resolve(process.cwd(), src);
-  return resolve(process.cwd(), DEFAULT_FILE);
 }
 
 export function isRemoteSource(): boolean {
@@ -80,54 +70,17 @@ function assertWritable() {
   }
 }
 
-async function readJsonSeed(): Promise<ValidatedScene[]> {
-  try {
-    const raw = JSON.parse(await readFile(storePath(), 'utf8'));
-    const report = parseScenes(raw);
-    if (report.issues.length) {
-      console.warn(
-        `[scene] ${report.issues.length} config issue(s), ` +
-          `${report.droppedItems} item(s) dropped:\n  ` +
-          report.issues.slice(0, 20).join('\n  '),
-      );
-    }
-    return report.scenes;
-  } catch {
-    const { allScenes } = await import('../configs');
-    return parseScenes(allScenes()).scenes;
-  }
-}
-
 async function readAll(): Promise<ValidatedScene[]> {
   if (cache) return cache.scenes;
-  if (isRemoteSource()) {
-    return [];
+  if (isRemoteSource() || !isSupabaseConfigured()) {
+    cache = { at: Date.now(), scenes: [] };
+    return cache.scenes;
   }
 
-  if (isSupabaseConfigured()) {
-    const remote = await loadScenesFromSupabase();
-    if (remote && remote.length) {
-      cache = { at: Date.now(), scenes: remote };
-      return remote;
-    }
-    const seeded = await readJsonSeed();
-    if (seeded.length) {
-      try {
-        await saveScenesToSupabase(seeded as unknown as SceneConfig[]);
-      } catch (err) {
-        throw new StoreError(
-          `supabase seed failed: ${err instanceof Error ? err.message : 'unknown'}`,
-          500,
-        );
-      }
-    }
-    cache = { at: Date.now(), scenes: seeded };
-    return seeded;
-  }
-
-  const seeded = await readJsonSeed();
-  cache = { at: Date.now(), scenes: seeded };
-  return seeded;
+  const remote = await loadScenesFromSupabase();
+  const scenes = remote ?? [];
+  cache = { at: Date.now(), scenes };
+  return scenes;
 }
 
 async function assertRoutes(scenes: ValidatedScene[]) {

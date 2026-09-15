@@ -15,7 +15,7 @@ import type { SiteKey } from '../types';
 
 export type SceneMedia = {
   id: string;
-  kind: 'image' | 'pdf';
+  kind: 'image' | 'pdf' | 'video' | 'audio';
   path: string;
   mime?: string | null;
   bytes?: number | null;
