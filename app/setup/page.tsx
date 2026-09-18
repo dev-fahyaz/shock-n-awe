@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
+import { LogoutButton } from 'components/LogoutButton';
 import { Button } from 'components/ui/Button';
+import { isAdmin } from 'scene/auth/session';
 import { SITES } from 'scene/sites';
 import { list } from 'scene/source/store';
 
@@ -10,6 +13,8 @@ export const metadata = { robots: { index: false, follow: false }, title: 'Scene
 export const dynamic = 'force-dynamic';
 
 export default async function SetupPage() {
+  if (!(await isAdmin())) redirect('/login?next=/setup');
+
   const scenes = await list();
   const brands = Object.values(SITES).map(s => ({
     key: s.key,
@@ -30,9 +35,12 @@ export default async function SetupPage() {
             Assign each scene to SAT and Aspire. Stored in Supabase.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/">Index</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild>
+            <Link href="/">Index</Link>
+          </Button>
+          <LogoutButton />
+        </div>
       </div>
       <SetupList scenes={scenes} brands={brands} />
     </main>

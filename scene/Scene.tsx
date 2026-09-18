@@ -36,9 +36,17 @@ interface Props {
   items: ResolvedItem[];
   links?: Record<string, string>;
   trail?: TrailNode[];
+  operator?: boolean;
 }
 
-export function Scene({ config, site, items, links = {}, trail = [] }: Props) {
+export function Scene({
+  config,
+  site,
+  items,
+  links = {},
+  trail = [],
+  operator = false,
+}: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showOutlines, setShowOutlines] = useState(false);
   const [setupId, setSetupId] = useState<string | null>(null);
@@ -140,7 +148,7 @@ export function Scene({ config, site, items, links = {}, trail = [] }: Props) {
         style={{ ['--brand-accent' as string]: BRAND_ACCENT[site] }}
       >
         <SceneBanner config={config} />
-        <SceneBreadcrumb />
+        <SceneBreadcrumb operator={operator} />
 
         {/* Desktop / tablet: the scene itself. */}
         <div className="hidden px-4 py-6 md:block">

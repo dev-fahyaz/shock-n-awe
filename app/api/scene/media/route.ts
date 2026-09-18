@@ -58,7 +58,7 @@ function safeName(name: string): string {
 }
 
 export async function POST(req: Request) {
-  if (!setupAuthorized(req)) return setupDeny();
+  if (!(await setupAuthorized())) return setupDeny();
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {

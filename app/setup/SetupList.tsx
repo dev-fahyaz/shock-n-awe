@@ -11,7 +11,6 @@ import {
   createScene,
   deleteScene,
   purgeUnusedMedia,
-  rememberSetupSecret,
   saveScene,
   sceneUrl,
   withBrandRoute,
@@ -186,16 +185,6 @@ export function SetupList({
             {busy === 'purge' ? 'Removing…' : 'Remove unused files'}
           </Button>
         </div>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          Setup secret
-          <input
-            type="password"
-            autoComplete="off"
-            placeholder="optional"
-            className="h-8 w-48 rounded-md border bg-background px-2"
-            onChange={e => rememberSetupSecret(e.target.value)}
-          />
-        </label>
       </div>
     </div>
   );

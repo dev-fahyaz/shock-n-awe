@@ -7,7 +7,7 @@ import type { SceneConfig } from '../types';
  * Postgres + Storage backend.
  *
  * URL + service role only (Setup, engine, and the host helper). Never a
- * browser/anon key. Marketing hosts call `get_live_post` with the same pair.
+ * browser/publishable key. Marketing hosts call `get_live_post` with the same pair.
  */
 
 export const TABLE_SCENES = 'sna_scenes';

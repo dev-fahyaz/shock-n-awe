@@ -1,6 +1,8 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 
+import { LogoutButton } from 'components/LogoutButton';
+import { isAdmin } from 'scene/auth/session';
 import { SITES } from 'scene/sites';
 import { getById, list } from 'scene/source/store';
 
@@ -14,6 +16,8 @@ export default async function EditScenePage({
 }: {
   params: { id: string };
 }) {
+  if (!(await isAdmin())) redirect(`/login?next=/setup/${encodeURIComponent(params.id)}`);
+
   const scene = await getById(params.id);
   if (!scene) notFound();
 
@@ -32,6 +36,7 @@ export default async function EditScenePage({
         <Link href="/setup" className="text-sm text-muted-foreground hover:text-foreground">
           ← Scenes
         </Link>
+        <LogoutButton />
       </div>
       <Editor scene={scene} brands={brands} all={all} />
     </main>

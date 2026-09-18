@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
+import { LogoutButton } from 'components/LogoutButton';
 import { Button } from 'components/ui/Button';
+import { isAdmin } from 'scene/auth/session';
 import { currentSite, currentSiteKey, SITES } from 'scene/sites';
 import { sceneSource } from 'scene/source';
 import type { SceneConfig, SiteKey } from 'scene/types';
@@ -12,6 +15,8 @@ function liveOn(scene: SceneConfig, site: SiteKey) {
 }
 
 export default async function Home() {
+  if (!(await isAdmin())) redirect('/login?next=/');
+
   const siteKey = currentSiteKey();
   const site = currentSite();
   const scenes = await sceneSource().list();
@@ -38,9 +43,12 @@ export default async function Home() {
             scene to SAT and Aspire.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/setup">Setup</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild>
+            <Link href="/setup">Setup</Link>
+          </Button>
+          <LogoutButton />
+        </div>
       </div>
 
       <ul className="mt-10 space-y-2">

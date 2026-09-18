@@ -4,11 +4,20 @@ Operator guide for Shock and Awe. Build and deploy: [`README.md`](../README.md).
 
 SAT is brand key `asat` (securityawarenesstraining.ai). Aspire is `aspire` (aspiretss.com).
 
+Sign in at `/login` with the email and password of a Supabase Auth user that also has `app_users.role = admin`. `/` and `/setup` redirect to login otherwise. Live scene URLs (`/{slug}`) stay public — visitors on SAT/Aspire never see Back, Setup, or the catalog.
+
+Seed an admin (SQL editor), after creating the user in Authentication:
+
+```sql
+insert into public.app_users (id, email, role)
+values ('<auth user uuid>', 'you@example.com', 'admin');
+```
+
 ---
 
 ## Scene list (`/setup`)
 
-`/` is the public index of live scenes. `/setup` is the operator list (noindex).
+`/` is the signed-in index of live scenes. `/setup` is the operator list (noindex).
 
 - **Add** creates a scene (starts as SAT draft) and opens the editor.
 - **SAT** and **Aspire** chips cycle `off` → `draft` → `live`. Click to assign or drop a brand, then save writes `routes[]`.
@@ -71,4 +80,4 @@ Click either opens the modal **or** navigates — never both.
 
 Recipient tokens such as `{{firstName}}` in a letter resolve from `?r=` after first paint so the page can stay cached.
 
-A scene assigned **live** for a brand is what SAT/Aspire will iframe. Draft stays in Setup only.
+A scene assigned **live** for a brand is what SAT/Aspire will iframe. Draft stays in Setup only. The iframe has no Back control into this engine.

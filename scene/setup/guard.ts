@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { StoreError } from '../source/store';
+import { isAdmin } from '../auth/session';
 
-export function setupAuthorized(req: Request): boolean {
-  const secret = process.env.SCENE_SETUP_SECRET;
-  if (!secret) return process.env.NODE_ENV !== 'production';
-  const provided = req.headers.get('x-scene-secret') ?? '';
-  return provided.length === secret.length && provided === secret;
+/** True when the request has a Supabase Auth session with app_users.role = admin. */
+export async function setupAuthorized(): Promise<boolean> {
+  return isAdmin();
 }
 
 export function setupDeny() {

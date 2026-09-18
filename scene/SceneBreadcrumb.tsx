@@ -12,11 +12,10 @@ function sceneHref(slug: string, setupId: string | null) {
 }
 
 /**
- * Persistent exit. Back returns to Setup when the scene was opened from the
- * editor (`?setup=`), otherwise to the scene index. Parent crumbs and Up
- * appear only when this scene sits under another.
+ * Operator chrome only. SAT/Aspire iframe visitors have no admin session, so
+ * this renders nothing — they cannot walk back to the catalog or Setup.
  */
-export function SceneBreadcrumb() {
+export function SceneBreadcrumb({ operator }: { operator: boolean }) {
   const { trail } = useScene();
   const nested = trail.length >= 2;
   const parent = nested ? trail[trail.length - 2] : null;
@@ -25,6 +24,8 @@ export function SceneBreadcrumb() {
   useEffect(() => {
     setSetupId(setupReturnId());
   }, []);
+
+  if (!operator) return null;
 
   const backHref = setupId ? `/setup/${encodeURIComponent(setupId)}` : '/';
 

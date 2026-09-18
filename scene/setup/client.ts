@@ -1,20 +1,7 @@
 import type { SceneConfig, SceneRoute, SiteKey } from '../types';
 
-const SECRET_KEY = 'scene-setup-secret';
-
-function secretHeader(): Record<string, string> {
-  const secret =
-    typeof window === 'undefined' ? '' : sessionStorage.getItem(SECRET_KEY) ?? '';
-  return secret ? { 'x-scene-secret': secret } : {};
-}
-
-function headers(): HeadersInit {
-  return { 'content-type': 'application/json', ...secretHeader() };
-}
-
-export function rememberSetupSecret(secret: string) {
-  if (secret) sessionStorage.setItem(SECRET_KEY, secret);
-  else sessionStorage.removeItem(SECRET_KEY);
+function jsonHeaders(): HeadersInit {
+  return { 'content-type': 'application/json' };
 }
 
 async function parse<T>(res: Response): Promise<T> {
@@ -26,7 +13,7 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 export async function listScenes(): Promise<SceneConfig[]> {
-  const res = await fetch('/api/scene/setup', { headers: headers(), cache: 'no-store' });
+  const res = await fetch('/api/scene/setup', { headers: jsonHeaders(), cache: 'no-store' });
   const body = await parse<{ scenes: SceneConfig[] }>(res);
   return body.scenes;
 }
@@ -34,7 +21,7 @@ export async function listScenes(): Promise<SceneConfig[]> {
 export async function createScene(): Promise<SceneConfig> {
   const res = await fetch('/api/scene/setup', {
     method: 'POST',
-    headers: headers(),
+    headers: jsonHeaders(),
     body: '{}',
   });
   const body = await parse<{ scene: SceneConfig }>(res);
@@ -44,7 +31,7 @@ export async function createScene(): Promise<SceneConfig> {
 export async function saveScene(scene: SceneConfig): Promise<SceneConfig> {
   const res = await fetch('/api/scene/setup', {
     method: 'PUT',
-    headers: headers(),
+    headers: jsonHeaders(),
     body: JSON.stringify(scene),
   });
   const body = await parse<{ scene: SceneConfig }>(res);
@@ -54,7 +41,7 @@ export async function saveScene(scene: SceneConfig): Promise<SceneConfig> {
 export async function deleteScene(id: string): Promise<void> {
   const res = await fetch(`/api/scene/setup?id=${encodeURIComponent(id)}`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: jsonHeaders(),
   });
   await parse(res);
 }
@@ -70,7 +57,6 @@ export async function uploadSceneMedia(
   body.set('file', file);
   const res = await fetch('/api/scene/media', {
     method: 'POST',
-    headers: secretHeader(),
     body,
   });
   return parse<{ url: string; id: string }>(res);
@@ -79,7 +65,7 @@ export async function uploadSceneMedia(
 export async function purgeUnusedMedia(): Promise<{ media: number; files: number }> {
   const res = await fetch('/api/scene/media/purge', {
     method: 'POST',
-    headers: headers(),
+    headers: jsonHeaders(),
     body: '{}',
   });
   return parse<{ media: number; files: number }>(res);

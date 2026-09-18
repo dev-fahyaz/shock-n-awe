@@ -14,7 +14,7 @@ cp .env.example .env.local
 npm run dev                    # http://localhost:3000
 ```
 
-`/` is the live-scene index. Setup is `/setup`.
+`/` and `/setup` are **admin-only** (Supabase Auth + `app_users.role = admin`). Live scenes are `/<slug>`. Sign in at `/login`.
 
 | Command | What it does |
 |---|---|
@@ -34,7 +34,8 @@ Copy [`.env.example`](.env.example). Required for Setup and live scenes:
 | Variable | Purpose |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Shared project URL (engine + host helper) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Setup, engine, and host helper. Never `NEXT_PUBLIC_` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Scene data. Never `NEXT_PUBLIC_` |
+| `SUPABASE_PUBLISHABLE_KEY` | Server-only. Admin login cookies (`sb_publishable_…`). Never `NEXT_PUBLIC_` |
 | `SCENE_ENGINE_URL` | Public origin of this app, for SAT/Aspire iframes |
 
 Optional:
@@ -58,12 +59,14 @@ Without these env vars the catalog is empty.
 
 1. The project should already be online. Contact an administrator if the database is not present.
 2. Tables `sna_scenes` and `sna_media` (`scene_id` FK), `get_live_post` RPC, public buckets `scene-images`, `scene-docs`, `scene-video`, `scene-audio`.
-3. Put the project **URL** and **service role** key in `.env.local` (and in production).
+3. Put the project **URL**, **service role** key, and **publishable** key (Auth only) in `.env.local`.
+4. In Supabase Auth, create the operator user. Insert `app_users` with that user's `id`, `email`, and `role = 'admin'`. There is no signup in the app.
 
 | Layer | Holds |
 |---|---|
 | Postgres `sna_scenes` | Full scene JSON, including brand routes |
 | Postgres `sna_media` | Image/PDF/video/audio rows keyed by `scene_id` |
+| Postgres `app_users` | Auth user id, email, `role` (`admin` for Setup) |
 | Storage | File bytes in the four buckets |
 | Not in Storage | YouTube / Vimeo URLs stay embeds |
 
@@ -75,10 +78,10 @@ Free-tier caps: 500 MB database, 1 GB file storage, **50 MB max upload**. Keep u
 
 ## Deploy
 
-1. Set the production env vars above (URL + service role + `SCENE_ENGINE_URL` as this app’s public origin).
-2. Run `schema.sql` once on the production Supabase project if it is a new project.
+1. Set the production env vars above (URL + service role + publishable key + `SCENE_ENGINE_URL`).
+2. Run `schema.sql` once on the production Supabase project if it is a new project (includes `app_users`).
 3. `npm run build` and host the Next app (Vercel or equivalent). The engine origin is what SAT/Aspire iframe.
-4. Assign scenes **live** in `/setup`. A new live row is visible on the next host request (after a short cache). No per-slug rewrites on the marketing sites.
+4. Sign in at `/login`. Assign scenes **live** in `/setup`. A new live row is visible on the next host request (after a short cache). No per-slug rewrites on the marketing sites.
 
 ```
 Setup (this repo) ──writes──► Supabase (config + Storage)
@@ -114,13 +117,14 @@ export default async function CatchAll({ params }: { params: { slug: string } })
       src={route.href}
       title={route.slug}
       className="h-screen w-full border-0"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation allow-downloads"
       allow="autoplay; fullscreen; encrypted-media"
     />
   );
 }
 ```
 
-`listLiveRoutes(site)` is the same RPC with slug omitted (sitemap / nav). Cache is ~45 seconds. Helper prefers `get_live_post`; if URL/key are missing it falls back to `GET {SCENE_ENGINE_URL}/api/scene/navigate?site=`.
+`listLiveRoutes(site)` is the same RPC with slug omitted (sitemap / nav). Cache is ~45 seconds. Helper prefers `get_live_post`. The engine’s `GET /api/scene/navigate` catalog (no slug) is admin-only.
 
 If you copied `host-kit/`, see [`host-kit/JOIN.md`](host-kit/JOIN.md).
 
@@ -130,7 +134,7 @@ If you copied `host-kit/`, see [`host-kit/JOIN.md`](host-kit/JOIN.md).
 
 ```
 Shock-and-Awe/
-├── app/                      routes: index, /setup, /[sceneSlug]
+├── app/                      routes: /login, index, /setup, /[sceneSlug]
 ├── middleware.ts             host → brand; old slug → 301
 ├── scene/                    engine, Setup client, Supabase source, host helper
 ├── supabase/schema.sql       tables, RPC, buckets

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
+import { isAdmin } from 'scene/auth/session';
 import { Scene } from 'scene/Scene';
 import { absoluteUrl, currentSiteKey, SITES } from 'scene/sites';
 import { resolveNavigation } from 'scene/source/navigate';
@@ -66,6 +67,8 @@ export default async function ScenePage({ params }: PageProps) {
     notFound();
   }
 
+  const operator = await isAdmin();
+
   return (
     <main className="min-h-screen bg-[#0b1020]">
       <Scene
@@ -74,6 +77,7 @@ export default async function ScenePage({ params }: PageProps) {
         items={scene.items}
         links={scene.links}
         trail={scene.trail}
+        operator={operator}
       />
     </main>
   );

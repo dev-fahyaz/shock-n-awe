@@ -14,7 +14,6 @@ import {
 import { Button } from 'components/ui/Button';
 import { cn } from 'components/ui/utils';
 import {
-  rememberSetupSecret,
   saveScene,
   sceneUrl,
   uploadSceneMedia,
@@ -319,16 +318,6 @@ export function Editor({
           </Button>
         </div>
       </div>
-
-      <label className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-        Setup secret
-        <input
-          type="password"
-          autoComplete="off"
-          className="h-8 w-48 rounded-md border bg-background px-2"
-          onChange={e => rememberSetupSecret(e.target.value)}
-        />
-      </label>
 
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 

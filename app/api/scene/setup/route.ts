@@ -14,8 +14,7 @@ import { isSupabaseConfigured } from 'scene/source/supabase';
 import type { SceneConfig } from 'scene/types';
 
 /**
- * Scene anatomy CRUD. Writes go to sna_scenes. Gated by SCENE_SETUP_SECRET;
- * if that is unset, writes are allowed only outside production.
+ * Scene anatomy CRUD. Writes go to sna_scenes. Gated by an admin Auth session.
  */
 
 function touch(scene: SceneConfig, extra: string[] = []) {
@@ -51,7 +50,7 @@ function needSupabase() {
 }
 
 export async function GET(req: Request) {
-  if (!setupAuthorized(req)) return setupDeny();
+  if (!(await setupAuthorized())) return setupDeny();
 
   try {
     const id = new URL(req.url).searchParams.get('id');
@@ -69,7 +68,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!setupAuthorized(req)) return setupDeny();
+  if (!(await setupAuthorized())) return setupDeny();
   const blocked = needSupabase();
   if (blocked) return blocked;
 
@@ -86,7 +85,7 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  if (!setupAuthorized(req)) return setupDeny();
+  if (!(await setupAuthorized())) return setupDeny();
   const blocked = needSupabase();
   if (blocked) return blocked;
 
@@ -104,7 +103,7 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (!setupAuthorized(req)) return setupDeny();
+  if (!(await setupAuthorized())) return setupDeny();
   const blocked = needSupabase();
   if (blocked) return blocked;
 

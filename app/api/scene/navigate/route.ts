@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { setupAuthorized, setupDeny } from 'scene/setup/guard';
 import { currentSiteKey } from 'scene/sites';
 import { resolveNavigation } from 'scene/source/navigate';
 import { sceneSource } from 'scene/source';
@@ -12,6 +13,8 @@ import type { SiteKey } from 'scene/types';
  *
  *   GET /api/scene/navigate?slug=nyc-security-desk
  *   GET /api/scene/navigate?id=nyc-financial-desk&site=asat
+ *
+ * Listing every live route (no slug/id) is admin-only.
  */
 
 export async function GET(req: Request) {
@@ -21,6 +24,7 @@ export async function GET(req: Request) {
   const id = url.searchParams.get('id') ?? undefined;
 
   if (!slug && !id) {
+    if (!(await setupAuthorized())) return setupDeny();
     const routes = await sceneSource().allLiveRoutes();
     return NextResponse.json({
       ok: true,
