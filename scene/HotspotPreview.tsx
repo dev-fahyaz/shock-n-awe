@@ -136,45 +136,52 @@ function faceFor(item: ResolvedItem): FaceSpec | null {
 }
 
 const LETTER_W = 420;
-const LETTER_H = 544;
 
 function LetterMini({ item }: { item: LetterItem }) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const paperRef = useRef<HTMLElement>(null);
   const [scale, setScale] = useState(0.2);
   const paragraphs = letterText(item.bodyMdx).split(/\n{2,}/).filter(Boolean);
 
   useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
+    const wrap = wrapRef.current;
+    const paper = paperRef.current;
+    if (!wrap || !paper) return;
     let frame = 0;
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const next = Math.min(el.clientWidth / LETTER_W, el.clientHeight / LETTER_H);
+        const paperW = paper.offsetWidth || LETTER_W;
+        const paperH = paper.scrollHeight;
+        if (paperW <= 0 || paperH <= 0 || wrap.clientWidth <= 0 || wrap.clientHeight <= 0) {
+          return;
+        }
+        const next = Math.min(wrap.clientWidth / paperW, wrap.clientHeight / paperH);
         setScale(s => (Math.abs(s - next) < 0.008 ? s : next));
       });
     };
     measure();
     const obs = new ResizeObserver(measure);
-    obs.observe(el);
+    obs.observe(wrap);
+    obs.observe(paper);
     return () => {
       cancelAnimationFrame(frame);
       obs.disconnect();
     };
-  }, []);
+  }, [item.bodyMdx, item.letterheadSrc, item.signature]);
 
   return (
     <div ref={wrapRef} className="pointer-events-none absolute inset-0 overflow-hidden">
       <article
-        className="absolute left-1/2 top-0 overflow-hidden bg-[#f8f7f3] text-[#1c1e22]"
+        ref={paperRef}
+        className="absolute left-1/2 top-0 bg-[#f8f7f3] text-[#1c1e22]"
         style={{
           width: LETTER_W,
-          height: LETTER_H,
           transform: `translateX(-50%) scale(${scale})`,
           transformOrigin: 'top center',
         }}
       >
-        <div className="flex h-full flex-col px-10 py-9">
+        <div className="flex flex-col px-10 py-9">
           {item.letterheadSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.letterheadSrc} alt="" className="mb-6 h-9 w-auto" />
@@ -185,7 +192,7 @@ function LetterMini({ item }: { item: LetterItem }) {
             </p>
           ))}
           {item.signature && (
-            <footer className="mt-auto border-t border-black/10 pt-4">
+            <footer className="mt-4 border-t border-black/10 pt-4">
               {item.signature.image && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={item.signature.image} alt="" className="mb-2 h-10 w-auto" />

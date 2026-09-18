@@ -127,12 +127,26 @@ export async function deleteMediaRows(ids: string[]): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+async function ensureBucket(kind: MediaKind): Promise<void> {
+  const id = bucketForKind(kind);
+  const db = admin();
+  const existing = await db.storage.getBucket(id);
+  if (existing.data) return;
+  const { error } = await db.storage.createBucket(id, { public: true });
+  if (!error) return;
+  const status = (error as { statusCode?: string | number }).statusCode;
+  if (status === 409 || status === '409') return;
+  if (/already exists/i.test(error.message)) return;
+  throw new Error(error.message);
+}
+
 export async function uploadObject(
   kind: MediaKind,
   path: string,
   body: Buffer,
   mime: string,
 ): Promise<void> {
+  await ensureBucket(kind);
   const { error } = await admin()
     .storage.from(bucketForKind(kind))
     .upload(path, body, { contentType: mime, upsert: false });

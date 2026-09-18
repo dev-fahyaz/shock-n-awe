@@ -16,3 +16,6 @@ next-env.d.ts
 # Generated at prebuild from the app/ directory
 scene/reserved.json
 supabase/
+
+# Portable SAT/Aspire drop-in — copy, do not commit
+host-kit/
