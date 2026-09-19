@@ -58,7 +58,8 @@ export default function VideoViewer({ item, sceneId }: ViewerProps) {
       <ProviderFrame
         embedUrl={media.embedUrl}
         title={item.label}
-        className="size-full bg-black"
+        muted={muted}
+        className="h-full w-full bg-black"
       />
     );
   }

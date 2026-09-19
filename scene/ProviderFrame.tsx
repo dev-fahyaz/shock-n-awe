@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 
+import { cn } from 'components/ui/utils';
 import { withEmbedPlayback } from './media';
 
 type YtPlayer = {
@@ -58,23 +59,33 @@ export function ProviderFrame({
   title,
   className,
   mini = false,
+  muted,
 }: {
   embedUrl: string;
   title: string;
   className?: string;
   mini?: boolean;
+  muted?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YtPlayer | null>(null);
   const iframeId = useRef(`yt-${Math.random().toString(36).slice(2, 10)}`).current;
+  const mute = muted ?? mini;
   const src = useMemo(
-    () => withEmbedPlayback(embedUrl, { muted: true, loop: mini, controls: !mini }),
-    [embedUrl, mini],
+    () =>
+      withEmbedPlayback(embedUrl, {
+        muted: mute,
+        loop: mini,
+        controls: !mini,
+      }),
+    [embedUrl, mini, mute],
   );
   const youtube = isYoutube(src);
 
   useEffect(() => {
-    if (!youtube) return;
+    // Desk miniature only. The modal uses a normal embed; YT.Player on a
+    // zero-size dialog iframe leaves a blank frame.
+    if (!youtube || !mini) return;
     const iframe = hostRef.current?.querySelector('iframe');
     if (!iframe) return;
     let dead = false;
@@ -104,15 +115,15 @@ export function ProviderFrame({
       }
       playerRef.current = null;
     };
-  }, [src, youtube]);
+  }, [src, youtube, mini]);
 
   return (
-    <div ref={hostRef} className={className}>
+    <div ref={hostRef} className={cn('relative h-full w-full', className)}>
       <iframe
         id={iframeId}
         src={src}
         title={title}
-        className="size-full border-0 bg-black"
+        className="absolute inset-0 size-full border-0 bg-black"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         allowFullScreen={!mini}
         referrerPolicy="strict-origin-when-cross-origin"

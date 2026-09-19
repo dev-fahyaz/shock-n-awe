@@ -67,7 +67,7 @@ export function SceneModal() {
     <Dialog open onOpenChange={isOpen => !isOpen && close()}>
       <DialogContent
         hideClose
-        className="flex h-[88vh] max-h-[88vh] w-[min(1100px,94vw)] max-w-none flex-col gap-0 overflow-hidden rounded-2xl border-white/10 p-0"
+        className="!flex h-[88vh] max-h-[88vh] w-[min(1100px,94vw)] max-w-none flex-col gap-0 overflow-hidden rounded-2xl border-white/10 p-0"
       >
         <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 bg-white/[0.03] px-5 py-3 backdrop-blur-md">
           <div className="min-w-0">
@@ -113,10 +113,12 @@ export function SceneModal() {
           </div>
         </header>
 
-        <div className="min-h-0 grow bg-muted/30">
-          <Suspense fallback={<Skeleton className="size-full rounded-none" />}>
-            <Viewer item={activeItem} sceneId={config.id} />
-          </Suspense>
+        <div className="relative min-h-0 flex-1 bg-black">
+          <div className="absolute inset-0">
+            <Suspense fallback={<Skeleton className="size-full rounded-none" />}>
+              <Viewer item={activeItem} sceneId={config.id} />
+            </Suspense>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
