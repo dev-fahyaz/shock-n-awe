@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+.git
+.gitignore
+*.md
+host-kit
+.env
+.env.*
+!.env.example
+.scene-validate
+*.tsbuildinfo
+.DS_Store
+*.log

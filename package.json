@@ -5,13 +5,14 @@
   "description": "Config-driven interactive scene engine — desk, plan board, office environment — serving securityawarenesstraining.ai and aspiretss.com.",
   "type": "module",
   "scripts": {
-    "dev": "npm run prebuild:scenes && next dev",
+    "dev": "npm run prebuild:scenes && next dev -p 5000",
     "build": "npm run prebuild:scenes && next build",
-    "start": "next start",
+    "start": "next start -p 5000",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "prebuild:scenes": "node scripts/reserved-slugs.mjs",
-    "validate:scenes": "node scripts/reserved-slugs.mjs && node scripts/validate-scenes.mjs"
+    "validate:scenes": "node scripts/reserved-slugs.mjs && node scripts/validate-scenes.mjs",
+    "test:login": "node scripts/test-login.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

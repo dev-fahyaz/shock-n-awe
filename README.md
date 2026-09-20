@@ -11,17 +11,19 @@ How to use Setup: [`docs/ui.md`](docs/ui.md). Engine internals: [`docs/Shock_and
 ```bash
 npm install
 cp .env.example .env.local
-npm run dev                    # http://localhost:3000
+npm run dev                    # http://localhost:5000
 ```
 
 `/` and `/setup` are **admin-only** (Supabase Auth + `app_users.role = admin`). Live scenes are `/<slug>`. Sign in at `/login`.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Regenerates reserved slugs, then starts Next |
+| `npm run dev` | Regenerates reserved slugs, then starts Next on port 5000 |
 | `npm run build` | Same, then a production build |
+| `npm run start` | Serves the production build on port 5000 |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run validate:scenes` | Slug collisions, canonical integrity, schema |
+| `npm run test:login` | POST `/api/auth/login` (password or JWT) — see below |
 
 On `localhost` the host matches neither brand, so resolution falls back to `asat`. Use `NEXT_PUBLIC_FORCE_SITE=aspire` to see the other brand.
 
@@ -49,7 +51,9 @@ Optional:
 | `NEXT_PUBLIC_SCENE_EMBED_HOSTS` | Extra iframe hosts, comma separated |
 | `SCENE_IMAGE_HOSTS` | Extra `next/image` hosts, comma separated |
 
-`next.config.mjs` fails the production build when a brand GTM id is missing unless `SKIP_ENV_CHECK=1`.
+`next.config.mjs` fails the production build when a brand GTM id is missing unless `SKIP_ENV_CHECK=1`. The Docker image sets `SKIP_ENV_CHECK=1` so analytics ids are optional at build; pass GTM as build args later if you want tags.
+
+Local `npm run dev` reads `.env.local`. Docker Compose reads `.env` and inlines `NEXT_PUBLIC_SUPABASE_URL` at image build.
 
 ---
 
@@ -78,10 +82,60 @@ Free-tier caps: 500 MB database, 1 GB file storage, **50 MB max upload**. Keep u
 
 ## Deploy
 
-1. Set the production env vars above (URL + service role + publishable key + `SCENE_ENGINE_URL`).
+On a VPS, this app is one Docker service on **port 5000**. Supabase stays the hosted project (no database in Compose).
+
+1. Copy [`.env.example`](.env.example) to `.env`. Set URL, service role, publishable key, and `SCENE_ENGINE_URL` to the **public** origin SAT/Aspire will iframe (this host on 5000, or HTTPS in front of it).
 2. Run `schema.sql` once on the production Supabase project if it is a new project (includes `app_users`).
-3. `npm run build` and host the Next app (Vercel or equivalent). The engine origin is what SAT/Aspire iframe.
-4. Sign in at `/login`. Assign scenes **live** in `/setup`. A new live row is visible on the next host request (after a short cache). No per-slug rewrites on the marketing sites.
+3. `docker compose up -d --build`
+4. Sign in at `/login`, or POST to `/api/auth/login` from the universal login channel. Assign scenes **live** in `/setup`.
+
+```
+docker compose up -d --build    # publishes 5000:5000
+```
+
+`POST /api/auth/login` accepts **either** `{ email, password }` **or** the current Supabase **session pair**:
+
+```json
+{
+  "access_token": "<jwt, starts with eyJ>",
+  "refresh_token": "<refresh token>"
+}
+```
+
+That pair is `session.access_token` and `session.refresh_token` from `supabase.auth.getSession()` on the other interface (same Supabase project). The `sb-*-auth-token` cookie is **not** an access token — it is a `base64-` wrapper around that JSON. Send the two fields (the login route will unwrap a cookie blob if that is what arrives).
+
+The user must have `app_users.role = admin`. On success this origin sets httpOnly cookies, so `/` and `/setup` skip `/login`. The browser form still uses email and password.
+
+From the other app, navigate the **browser** to this origin (a form POST) so the cookies stick here. A server-to-server POST cannot set cookies in the user's browser.
+
+```js
+const { data: { session } } = await supabase.auth.getSession();
+const form = document.createElement('form');
+form.method = 'POST';
+form.action = `${SCENE_ENGINE_URL}/api/auth/login`;
+for (const [name, value] of Object.entries({
+  access_token: session.access_token,
+  refresh_token: session.refresh_token,
+  next: '/setup',
+})) {
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = name;
+  input.value = value;
+  form.appendChild(input);
+}
+document.body.appendChild(form);
+form.submit();
+```
+
+JSON POST returns `{ ok: true, next }` (for `npm run test:login`). Form POST responds **303** to `next`.
+
+```bash
+npm run test:login -- --email you@example.com --password secret
+npm run test:login -- --token "$ACCESS_TOKEN" --refresh "$REFRESH_TOKEN"
+```
+
+Password mode also posts the extracted JWT pair (not the cookie) and checks that `/setup` does not bounce to `/login`. Default target is `http://localhost:5000`. Override with `--base` or `SCENE_ENGINE_URL`. Do not put real passwords or tokens in this file.
 
 ```
 Setup (this repo) ──writes──► Supabase (config + Storage)
@@ -137,9 +191,11 @@ Shock-and-Awe/
 ├── app/                      routes: /login, index, /setup, /[sceneSlug]
 ├── middleware.ts             host → brand; old slug → 301
 ├── scene/                    engine, Setup client, Supabase source, host helper
+├── Dockerfile                production image, port 5000
+├── docker-compose.yml        VPS: web on 5000:5000
 ├── supabase/schema.sql       tables, RPC, buckets
 ├── docs/ui.md                how to use Setup
-├── scripts/                  reserved slugs + validate
+├── scripts/                  reserved slugs, validate, test-login
 └── public/scene/stages/      optional local stage art for compiled examples
 ```
 

@@ -8,7 +8,7 @@ export async function POST() {
   const url = authUrl();
   const publishable = authPublishableKey();
   if (!url || !publishable) {
-    return NextResponse.redirect(new URL('/login', process.env.SCENE_ENGINE_URL || 'http://localhost:3000'));
+    return NextResponse.redirect(new URL('/login', process.env.SCENE_ENGINE_URL || 'http://localhost:5000'));
   }
 
   const store = cookies();
