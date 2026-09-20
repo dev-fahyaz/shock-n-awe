@@ -12,18 +12,16 @@ import { sceneSource } from 'scene/source';
  *
  * Static segments win over dynamic ones in the App Router, so `/setup` still
  * resolves to `app/setup/page.tsx` and only unmatched paths reach here.
+ *
+ * Must be dynamic: the page reads `headers()` (brand) and `cookies()` (admin
+ * Back). ISR (`revalidate`) plus those APIs throws DYNAMIC_SERVER_USAGE in
+ * production.
  */
 
-export const revalidate = 300;
-export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: { sceneSlug: string };
-}
-
-export async function generateStaticParams() {
-  const routes = await sceneSource().allLiveRoutes();
-  return routes.map(route => ({ sceneSlug: route.slug }));
 }
 
 export async function generateMetadata({

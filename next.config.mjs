@@ -1,3 +1,19 @@
+function imageHosts() {
+  const hosts = new Set(
+    (process.env.SCENE_IMAGE_HOSTS ?? '')
+      .split(',')
+      .map(h => h.trim())
+      .filter(Boolean),
+  );
+  try {
+    const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabase) hosts.add(new URL(supabase).hostname);
+  } catch {
+    /* ignore invalid URL */
+  }
+  return [...hosts].map(hostname => ({ protocol: 'https', hostname }));
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -9,15 +25,10 @@ const nextConfig = {
   },
   images: {
     formats: ['image/avif', 'image/webp'],
-    // Scene assets are dynamic: a stage background or page image may live on a
-    // CDN, in S3, or on a CMS host. Add each origin here, or next/image throws
-    // at request time. Viewers that render user-supplied images deliberately
-    // use a plain <img> so an unlisted host degrades instead of erroring.
-    remotePatterns: (process.env.SCENE_IMAGE_HOSTS ?? '')
-      .split(',')
-      .map(h => h.trim())
-      .filter(Boolean)
-      .map(hostname => ({ protocol: 'https', hostname })),
+    // Stage/viewers prefer <img> for dynamic Storage URLs. This list is for
+    // any remaining next/image use; the Supabase host is taken from the
+    // project URL at build (Compose already passes NEXT_PUBLIC_SUPABASE_URL).
+    remotePatterns: imageHosts(),
   },
 };
 

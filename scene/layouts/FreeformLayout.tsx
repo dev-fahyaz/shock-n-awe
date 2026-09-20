@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import type { CSSProperties } from 'react';
 
 import { cn } from 'components/ui/utils';
@@ -41,14 +40,13 @@ function FreeformStage({ config, children }: StageProps) {
           '0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px -24px rgba(0,0,0,0.65), 0 0 80px -20px color-mix(in srgb, var(--brand-accent) 28%, transparent)',
       } as CSSProperties}
     >
-      <Image
+      {/* Plain img: stage art is a Supabase (or other) URL. next/image 500s
+          in production unless every host is listed at build time. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={bg.src}
         alt={bg.alt}
-        fill
-        priority
-        unoptimized={bg.src.endsWith('.svg')}
-        sizes="(max-width: 768px) 100vw, (max-width: 1400px) 92vw, 1400px"
-        className="pointer-events-none object-cover"
+        className="pointer-events-none absolute inset-0 size-full object-cover"
       />
       <div
         aria-hidden
