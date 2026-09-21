@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 
+import { DashboardLink } from 'components/DashboardLink';
 import { isAdmin } from 'scene/auth/session';
 
 import { LoginForm } from './LoginForm';
@@ -23,6 +24,9 @@ export default async function LoginPage() {
       <Suspense>
         <LoginForm />
       </Suspense>
+      <div className="mt-6">
+        <DashboardLink />
+      </div>
     </main>
   );
 }

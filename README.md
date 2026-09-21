@@ -2,7 +2,7 @@
 
 A config-driven engine for **interactive scenes** (desk, board, office). It is a standalone Next.js app. SAT ([securityawarenesstraining.ai](https://www.securityawarenesstraining.ai)) and Aspire ([aspiretss.com](https://aspiretss.com)) stay their own codebases; they ask a fetch helper whether a slug is live, then iframe this engine.
 
-How to use Setup: [`docs/ui.md`](docs/ui.md). Engine internals: [`docs/Shock_and_Awe_Technical_Spec.md`](docs/Shock_and_Awe_Technical_Spec.md).
+How to use Setup: [`docs/ui.md`](docs/ui.md). Hub login channel: [`docs/login-channel.md`](docs/login-channel.md). Engine internals: [`docs/Shock_and_Awe_Technical_Spec.md`](docs/Shock_and_Awe_Technical_Spec.md).
 
 ---
 
@@ -23,7 +23,7 @@ npm run dev                    # http://localhost:5000
 | `npm run start` | Serves the production build on port 5000 |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run validate:scenes` | Slug collisions, canonical integrity, schema |
-| `npm run test:login` | POST `/api/auth/login` (password or JWT) — see below |
+| `npm run test:login` | Password, JWT, and optional one-time code handoff — see below |
 
 On `localhost` the host matches neither brand, so resolution falls back to `asat`. Use `NEXT_PUBLIC_FORCE_SITE=aspire` to see the other brand.
 
@@ -44,6 +44,8 @@ Optional:
 
 | Variable | Purpose |
 |---|---|
+| `HANDOFF_SECRET` | Hub server mint for `POST /api/auth/handoff` |
+| `DASHBOARD_URL` | Hub URL for **Return to dashboard** |
 | `NEXT_PUBLIC_GTM_ASAT` / `NEXT_PUBLIC_GTM_ASPIRE` | GTM containers. An unset id must render no tag |
 | `NEXT_PUBLIC_FORCE_SITE` | `asat` \| `aspire` — override host resolution locally |
 | `SKIP_ENV_CHECK=1` | Allow a production build with no analytics IDs |
@@ -87,55 +89,22 @@ On a VPS, this app is one Docker service on **port 5000**. Supabase stays the ho
 1. Copy [`.env.example`](.env.example) to `.env`. Set URL, service role, publishable key, and `SCENE_ENGINE_URL` to the **public** origin SAT/Aspire will iframe (this host on 5000, or HTTPS in front of it).
 2. Run `schema.sql` once on the production Supabase project if it is a new project (includes `app_users`).
 3. `docker compose up -d --build`
-4. Sign in at `/login`, or POST to `/api/auth/login` from the universal login channel. Assign scenes **live** in `/setup`.
+4. Sign in at `/login`, or open Setup from the hub via the [one-time code channel](docs/login-channel.md). Assign scenes **live** in `/setup`.
 
 ```
 docker compose up -d --build    # publishes 5000:5000
 ```
 
-`POST /api/auth/login` accepts **either** `{ email, password }` **or** the current Supabase **session pair**:
+The hub must not put JWTs in the page. It mints a one-time code on the server, then redirects the browser. Full contract: [`docs/login-channel.md`](docs/login-channel.md).
 
-```json
-{
-  "access_token": "<jwt, starts with eyJ>",
-  "refresh_token": "<refresh token>"
-}
-```
-
-That pair is `session.access_token` and `session.refresh_token` from `supabase.auth.getSession()` on the other interface (same Supabase project). The `sb-*-auth-token` cookie is **not** an access token — it is a `base64-` wrapper around that JSON. Send the two fields (the login route will unwrap a cookie blob if that is what arrives).
-
-The user must have `app_users.role = admin`. On success this origin sets httpOnly cookies, so `/` and `/setup` skip `/login`. The browser form still uses email and password.
-
-From the other app, navigate the **browser** to this origin (a form POST) so the cookies stick here. A server-to-server POST cannot set cookies in the user's browser.
-
-```js
-const { data: { session } } = await supabase.auth.getSession();
-const form = document.createElement('form');
-form.method = 'POST';
-form.action = `${SCENE_ENGINE_URL}/api/auth/login`;
-for (const [name, value] of Object.entries({
-  access_token: session.access_token,
-  refresh_token: session.refresh_token,
-  next: '/setup',
-})) {
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = name;
-  input.value = value;
-  form.appendChild(input);
-}
-document.body.appendChild(form);
-form.submit();
-```
-
-JSON POST returns `{ ok: true, next }` (for `npm run test:login`). Form POST responds **303** to `next`.
+`POST /api/auth/login` still accepts `{ email, password }` or `{ access_token, refresh_token }` (tests / fallback). The user must have `app_users.role = admin`. Set `DASHBOARD_URL` to the hub origin so Setup shows **Return to dashboard**.
 
 ```bash
 npm run test:login -- --email you@example.com --password secret
 npm run test:login -- --token "$ACCESS_TOKEN" --refresh "$REFRESH_TOKEN"
 ```
 
-Password mode also posts the extracted JWT pair (not the cookie) and checks that `/setup` does not bounce to `/login`. Default target is `http://localhost:5000`. Override with `--base` or `SCENE_ENGINE_URL`. Do not put real passwords or tokens in this file.
+With `HANDOFF_SECRET` (or `--handoff-secret`), password mode also mints a code and consumes it. Default target is `http://localhost:5000`. Override with `--base` or `SCENE_ENGINE_URL`. Do not put real passwords or tokens in this file.
 
 ```
 Setup (this repo) ──writes──► Supabase (config + Storage)
@@ -195,6 +164,7 @@ Shock-and-Awe/
 ├── docker-compose.yml        VPS: web on 5000:5000
 ├── supabase/schema.sql       tables, RPC, buckets
 ├── docs/ui.md                how to use Setup
+├── docs/login-channel.md     hub one-time code login
 ├── scripts/                  reserved slugs, validate, test-login
 └── public/scene/stages/      optional local stage art for compiled examples
 ```

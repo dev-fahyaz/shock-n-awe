@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { DashboardLink } from 'components/DashboardLink';
 import { LogoutButton } from 'components/LogoutButton';
 import { Button } from 'components/ui/Button';
 import { isAdmin } from 'scene/auth/session';
@@ -39,6 +40,7 @@ export default async function SetupPage() {
           <Button asChild>
             <Link href="/">Index</Link>
           </Button>
+          <DashboardLink />
           <LogoutButton />
         </div>
       </div>

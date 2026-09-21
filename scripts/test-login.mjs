@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 /**
- * Hit POST /api/auth/login. Password login, then the same session as a
- * universal-channel JWT handoff. Does not print cookie or token values.
+ * Hit POST /api/auth/login. Password login, then JWT channel, then optional
+ * one-time code handoff. Does not print cookie, token, or code values.
  *
  *   node scripts/test-login.mjs --email you@example.com --password secret
  *   node scripts/test-login.mjs --token "$ACCESS_TOKEN" --refresh "$REFRESH_TOKEN"
  *
- * Do not pass the sb-*-auth-token cookie as --token. That cookie wraps JSON
- * { access_token, refresh_token }. The channel must send those two fields
- * from supabase.auth.getSession().
+ * With HANDOFF_SECRET or --handoff-secret, password mode also POST /api/auth/handoff
+ * then GET /api/auth/consume?code=
  */
 
 function arg(name) {
@@ -27,6 +26,7 @@ const email = arg('email');
 const password = arg('password');
 const token = arg('token');
 const refresh = arg('refresh');
+const handoffSecret = arg('handoff-secret') || process.env.HANDOFF_SECRET;
 
 function looksLikeJwt(value) {
   return /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/.test(value || '');
@@ -102,7 +102,7 @@ function sessionFromSetCookies(setCookies) {
     const nv = String(header).split(';')[0];
     const eq = nv.indexOf('=');
     if (eq < 0) continue;
-    let name = nv.slice(0, eq).trim();
+    const name = nv.slice(0, eq).trim();
     let value = nv.slice(eq + 1);
     try {
       value = decodeURIComponent(value);
@@ -153,24 +153,89 @@ function fail(message) {
   process.exit(1);
 }
 
+async function assertSetup(cookies, label) {
+  const setup = await fetch(`${base}/setup`, {
+    redirect: 'manual',
+    headers: { cookie: cookieHeader(cookies) },
+  });
+  const loc = setup.headers.get('location') || '';
+  console.log(`--- ${label} ---`);
+  console.log(`GET ${base}/setup`);
+  console.log(`status ${setup.status}${loc ? ` location ${loc}` : ''}`);
+  if (setup.status >= 300 && /\/login(\?|$)/.test(loc)) {
+    fail('Cookies did not bypass /login.');
+  }
+  if (setup.status === 401 || setup.status === 403) {
+    fail('Cookies were rejected.');
+  }
+}
+
+async function testHandoff(session) {
+  if (!handoffSecret) {
+    console.log('--- one-time code ---');
+    console.log('skip (set HANDOFF_SECRET or --handoff-secret to exercise mint + consume)');
+    return;
+  }
+  const mint = await fetch(`${base}/api/auth/handoff`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${handoffSecret}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    }),
+  });
+  let mintBody = {};
+  try {
+    mintBody = await mint.json();
+  } catch {
+    fail('Handoff mint did not return JSON.');
+  }
+  console.log('--- one-time code mint ---');
+  console.log(`POST ${base}/api/auth/handoff`);
+  console.log(`status ${mint.status}`);
+  console.log(
+    mint.ok
+      ? `{ ok: true, code: (${String(mintBody.code || '').length} chars), expires_in: ${mintBody.expires_in} }`
+      : JSON.stringify({ ok: mintBody.ok, error: mintBody.error }),
+  );
+  if (!mint.ok || !mintBody.code) fail('Handoff mint failed.');
+
+  const consumeUrl = `${base}/api/auth/consume?code=${encodeURIComponent(mintBody.code)}&next=/setup`;
+  const consume = await fetch(consumeUrl, { redirect: 'manual' });
+  const cookies = setCookieHeaders(consume);
+  const loc = consume.headers.get('location') || '';
+  console.log('--- one-time code consume ---');
+  console.log(`GET ${base}/api/auth/consume?code=…`);
+  console.log(`status ${consume.status}${loc ? ` location ${loc}` : ''}`);
+  console.log(`set-cookie names: ${cookieNames(cookies).join(', ') || '(none)'}`);
+  if (consume.status !== 303 || /\/login(\?|$)/.test(loc)) {
+    fail('Consume did not 303 to /setup.');
+  }
+  if (!cookieNames(cookies).length) {
+    fail('Consume set no cookies.');
+  }
+  await assertSetup(cookies, 'setup with consume cookies');
+}
+
 if (!((email && password) || (token && refresh) || token)) {
   console.error(`Usage:
   node scripts/test-login.mjs --email you@example.com --password secret
   node scripts/test-login.mjs --token "$ACCESS_TOKEN" --refresh "$REFRESH_TOKEN"
 
-The other app must send the JWT pair from getSession(), not the auth cookie:
-  { "access_token": session.access_token, "refresh_token": session.refresh_token }
+Hub channel (see docs/login-channel.md): mint a code on the server, then
+redirect the browser to /api/auth/consume?code=…
 
-Optional: --base http://localhost:5000  (or SCENE_ENGINE_URL)`);
+Optional: --base http://localhost:5000  --handoff-secret  (or SCENE_ENGINE_URL / HANDOFF_SECRET)`);
   process.exit(1);
 }
-
-let session = null;
 
 if (email && password) {
   const passwordResult = await postLogin({ email, password }, 'password');
   if (!passwordResult.res.ok) process.exit(1);
-  session = sessionFromSetCookies(passwordResult.cookies);
+  const session = sessionFromSetCookies(passwordResult.cookies);
   if (!session) {
     fail(
       'Password login did not yield a decodable session cookie. Cannot test the JWT channel.',
@@ -188,21 +253,8 @@ if (email && password) {
   if (!cookieNames(channel.cookies).length) {
     fail('Channel login returned 200 but set no cookies — /setup would still redirect to /login.');
   }
-
-  const setup = await fetch(`${base}/setup`, {
-    redirect: 'manual',
-    headers: { cookie: cookieHeader(channel.cookies) },
-  });
-  const loc = setup.headers.get('location') || '';
-  console.log('--- setup with channel cookies ---');
-  console.log(`GET ${base}/setup`);
-  console.log(`status ${setup.status}${loc ? ` location ${loc}` : ''}`);
-  if (setup.status >= 300 && /\/login(\?|$)/.test(loc)) {
-    fail('Channel cookies did not bypass /login.');
-  }
-  if (setup.status === 401 || setup.status === 403) {
-    fail('Channel cookies were rejected.');
-  }
+  await assertSetup(channel.cookies, 'setup with channel cookies');
+  await testHandoff(session);
 } else {
   let access = token;
   let refreshToken = refresh;
@@ -229,4 +281,5 @@ if (email && password) {
     'channel',
   );
   if (!channel.res.ok) process.exit(1);
+  await testHandoff({ access_token: access, refresh_token: refreshToken });
 }

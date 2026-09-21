@@ -1,22 +1,14 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 import { HANDOFF_HINT, parseHandoffTokens } from 'scene/auth/handoff';
 import {
-  adminRoleFor,
-  applyAuthCookies,
-  authPublishableKey,
-  authUrl,
-  isAuthConfigured,
-  safeNextPath,
-} from 'scene/auth/shared';
-
-type CookiePending = {
-  name: string;
-  value: string;
-  options?: Record<string, unknown>;
-};
+  applySink,
+  createRouteSupabase,
+  establishAdminSession,
+  newCookieSink,
+  publicOrigin,
+} from 'scene/auth/establish';
+import { adminRoleFor, isAuthConfigured, safeNextPath } from 'scene/auth/shared';
 
 async function readBody(req: Request): Promise<{
   fields: Record<string, unknown>;
@@ -36,15 +28,6 @@ async function readBody(req: Request): Promise<{
   } catch {
     return { fields: {}, wantRedirect: false };
   }
-}
-
-function apply(
-  res: NextResponse,
-  pending: CookiePending[],
-  extraHeaders: Record<string, string>,
-) {
-  applyAuthCookies(res, pending, extraHeaders);
-  return res;
 }
 
 export async function POST(req: Request) {
@@ -75,71 +58,41 @@ export async function POST(req: Request) {
     );
   }
 
-  const store = cookies();
-  const pending: CookiePending[] = [];
-  let extraHeaders: Record<string, string> = {};
-
-  const supabase = createServerClient(authUrl(), authPublishableKey(), {
-    cookies: {
-      getAll() {
-        return store.getAll();
-      },
-      setAll(toSet, headers) {
-        toSet.forEach(({ name, value, options }) => {
-          pending.push({ name, value, options: options as Record<string, unknown> });
-        });
-        extraHeaders = headers ?? extraHeaders;
-      },
-    },
-  });
-
-  let userId: string | null = null;
-
-  if (passwordLogin) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error || !data.user) {
-      return apply(
-        NextResponse.json({ ok: false, error: 'Invalid email or password' }, { status: 401 }),
-        pending,
-        extraHeaders,
+  if (handoff) {
+    const result = await establishAdminSession(handoff);
+    if (!result.ok) {
+      return applySink(
+        NextResponse.json({ ok: false, error: result.error }, { status: result.status }),
+        result.sink,
       );
     }
-    userId = data.user.id;
-  } else if (handoff) {
-    const { data, error } = await supabase.auth.getUser(handoff.access_token);
-    if (error || !data.user) {
-      return apply(
-        NextResponse.json({ ok: false, error: `Invalid access token. ${HANDOFF_HINT}` }, { status: 401 }),
-        pending,
-        extraHeaders,
-      );
-    }
-    userId = data.user.id;
-    const { error: sessError } = await supabase.auth.setSession({
-      access_token: handoff.access_token,
-      refresh_token: handoff.refresh_token,
-    });
-    if (sessError) {
-      return apply(
-        NextResponse.json({ ok: false, error: 'Invalid session tokens' }, { status: 401 }),
-        pending,
-        extraHeaders,
-      );
-    }
+    const origin = publicOrigin(req);
+    const res = wantRedirect
+      ? NextResponse.redirect(new URL(next, origin), 303)
+      : NextResponse.json({ ok: true, next });
+    return applySink(res, result.sink);
   }
 
-  if (!userId || !(await adminRoleFor(userId))) {
+  const sink = newCookieSink();
+  const supabase = createRouteSupabase(sink);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error || !data.user) {
+    return applySink(
+      NextResponse.json({ ok: false, error: 'Invalid email or password' }, { status: 401 }),
+      sink,
+    );
+  }
+  if (!(await adminRoleFor(data.user.id))) {
     await supabase.auth.signOut();
-    return apply(
+    return applySink(
       NextResponse.json({ ok: false, error: 'Not an admin' }, { status: 403 }),
-      pending,
-      extraHeaders,
+      sink,
     );
   }
 
-  const origin = process.env.SCENE_ENGINE_URL || new URL(req.url).origin;
+  const origin = publicOrigin(req);
   const res = wantRedirect
     ? NextResponse.redirect(new URL(next, origin), 303)
     : NextResponse.json({ ok: true, next });
-  return apply(res, pending, extraHeaders);
+  return applySink(res, sink);
 }

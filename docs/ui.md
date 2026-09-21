@@ -4,7 +4,7 @@ Operator guide for Shock and Awe. Build and deploy: [`README.md`](../README.md).
 
 SAT is brand key `asat` (securityawarenesstraining.ai). Aspire is `aspire` (aspiretss.com).
 
-Sign in at `/login` with the email and password of a Supabase Auth user that also has `app_users.role = admin`. A universal login channel should `POST /api/auth/login` with `{ access_token, refresh_token }` from `supabase.auth.getSession()` (same project) — the JWT pair, not the `sb-*-auth-token` cookie. After this origin sets cookies, `/` and `/setup` skip the sign-in form. Unauthenticated requests to those paths redirect to login. Live scene URLs (`/{slug}`) stay public — visitors on SAT/Aspire never see Back, Setup, or the catalog.
+Sign in at `/login` with the email and password of a Supabase Auth user that also has `app_users.role = admin`. The outer dashboard should mint a one-time code ([`login-channel.md`](login-channel.md)) instead of posting JWTs from the page. After cookies are set, `/` and `/setup` skip the sign-in form. **Return to dashboard** appears when `DASHBOARD_URL` is set. Unauthenticated requests to those paths redirect to login. Live scene URLs (`/{slug}`) stay public — visitors on SAT/Aspire never see Back, Setup, or the catalog.
 
 Seed an admin (SQL editor), after creating the user in Authentication:
 

@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 
+import { DashboardLink } from 'components/DashboardLink';
 import { LogoutButton } from 'components/LogoutButton';
 import { isAdmin } from 'scene/auth/session';
 import { SITES } from 'scene/sites';
@@ -36,7 +37,10 @@ export default async function EditScenePage({
         <Link href="/setup" className="text-sm text-muted-foreground hover:text-foreground">
           ← Scenes
         </Link>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <DashboardLink />
+          <LogoutButton />
+        </div>
       </div>
       <Editor scene={scene} brands={brands} all={all} />
     </main>
