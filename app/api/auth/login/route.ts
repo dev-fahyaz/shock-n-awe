@@ -6,7 +6,7 @@ import {
   createRouteSupabase,
   establishAdminSession,
   newCookieSink,
-  publicOrigin,
+  redirectPath,
 } from 'scene/auth/establish';
 import { adminRoleFor, isAuthConfigured, safeNextPath } from 'scene/auth/shared';
 
@@ -66,9 +66,8 @@ export async function POST(req: Request) {
         result.sink,
       );
     }
-    const origin = publicOrigin(req);
     const res = wantRedirect
-      ? NextResponse.redirect(new URL(next, origin), 303)
+      ? redirectPath(next, 303)
       : NextResponse.json({ ok: true, next });
     return applySink(res, result.sink);
   }
@@ -90,9 +89,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const origin = publicOrigin(req);
   const res = wantRedirect
-    ? NextResponse.redirect(new URL(next, origin), 303)
+    ? redirectPath(next, 303)
     : NextResponse.json({ ok: true, next });
   return applySink(res, sink);
 }

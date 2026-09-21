@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import type { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import { HANDOFF_HINT, type HandoffTokens } from './handoff';
 import {
@@ -48,8 +48,14 @@ export function applySink(res: NextResponse, sink: CookieSink) {
   return res;
 }
 
-export function publicOrigin(req: Request): string {
-  return process.env.SCENE_ENGINE_URL || new URL(req.url).origin;
+/**
+ * Relative Location so the browser stays on the host it used.
+ * An absolute URL built from the incoming request advertises 0.0.0.0 inside Docker.
+ */
+export function redirectPath(path: string, status: 302 | 303) {
+  const res = new NextResponse(null, { status });
+  res.headers.set('Location', path);
+  return res;
 }
 
 /** Validate tokens and admin role without writing cookies (mint a code). */

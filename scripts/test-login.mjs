@@ -211,8 +211,11 @@ async function testHandoff(session) {
   console.log(`GET ${base}/api/auth/consume?code=…`);
   console.log(`status ${consume.status}${loc ? ` location ${loc}` : ''}`);
   console.log(`set-cookie names: ${cookieNames(cookies).join(', ') || '(none)'}`);
-  if (consume.status !== 303 || /\/login(\?|$)/.test(loc)) {
-    fail('Consume did not 303 to /setup.');
+  if (consume.status !== 303 || loc !== '/setup') {
+    fail(`Consume did not 303 to a relative /setup (location ${loc || '(none)'}).`);
+  }
+  if (loc.includes('0.0.0.0')) {
+    fail('Consume advertised 0.0.0.0.');
   }
   if (!cookieNames(cookies).length) {
     fail('Consume set no cookies.');
