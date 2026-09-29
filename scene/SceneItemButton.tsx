@@ -12,17 +12,14 @@ import { KIND_LABEL, useScene } from './useSceneItem';
 
 const HotspotPreview = dynamic(
   () => import('./HotspotPreview').then(m => ({ default: m.HotspotPreview })),
-  { ssr: false, loading: () => <span className="scene-hotspot" /> },
+  { ssr: false, loading: () => <span className="scene-object scene-object--plain" /> },
 );
 
 /**
  * One hotspot. Real <button> or <a> — never an image-map <area>.
  */
 
-const WRAP = cn(
-  'group block cursor-pointer rounded-md outline-none',
-  'focus-visible:outline-none',
-);
+const WRAP = cn('scene-item group block cursor-pointer outline-none');
 
 interface Props {
   item: ResolvedItem;

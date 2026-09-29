@@ -18,8 +18,11 @@ export interface StageProps {
 export interface LayoutStrategy {
   /** Wraps the scene: background image and aspect box, or grid columns. */
   Stage: ComponentType<StageProps>;
-  /** Style props for one positioned item. */
-  position: (placement: Placement) => CSSProperties;
+  /**
+   * Style props for one positioned item.
+   * `index` is the fallback paint order when a freeform placement omits `z`.
+   */
+  position: (placement: Placement, index?: number) => CSSProperties;
   /**
    * Freeform needs a purpose-built card list under `md` — 20px tap targets
    * stacked on top of each other are unusable. Grid just stacks its columns.

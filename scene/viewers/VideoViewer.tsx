@@ -14,7 +14,7 @@ import { ExternalFallback } from './ExternalFallback';
  *
  * A direct file (mp4 / webm / HLS) plays in a native `<video>`; a provider
  * link (YouTube, Vimeo, Loom, Wistia, Dailymotion) is normalised to its embed
- * form by the resolver and framed. A marketer pastes whatever they copied from
+ * form by the resolver. A marketer pastes whatever they copied from
  * the address bar and it works.
  *
  * Quartile progress is reported for direct files. Provider iframes do not

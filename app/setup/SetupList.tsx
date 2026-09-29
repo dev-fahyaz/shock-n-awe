@@ -151,7 +151,7 @@ export function SetupList({
             </div>
             {scene.routes[0] && (
               <Link
-                href={`/${scene.routes[0].slug}`}
+                href={`/${scene.routes[0].slug}?setup=${encodeURIComponent(scene.id)}`}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 View

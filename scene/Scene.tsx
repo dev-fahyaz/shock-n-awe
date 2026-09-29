@@ -150,22 +150,20 @@ export function Scene({
         <SceneBanner config={config} />
         <SceneBreadcrumb operator={operator} />
 
-        {/* Desktop / tablet: the scene itself. */}
         <div className="hidden px-4 py-6 md:block">
           <div className="mx-auto w-full max-w-[1400px]">
             <Stage config={config}>
-              {/* Only when the artwork leaves room for it — see stage.nameplate. */}
               {config.stage.nameplate && (
                 <SceneNameplate
                   config={config}
                   style={strategy.position(config.stage.nameplate)}
                 />
               )}
-              {items.map(item => (
+              {items.map((item, index) => (
                 <SceneItemButton
                   key={item.id}
                   item={item}
-                  style={strategy.position(item.placement)}
+                  style={strategy.position(item.placement, index)}
                   showOutlines={showOutlines}
                 />
               ))}
@@ -173,7 +171,6 @@ export function Scene({
           </div>
         </div>
 
-        {/* Under md: the same items as a card list. */}
         {strategy.needsMobileList && <SceneMobileList />}
 
         <SceneModal />

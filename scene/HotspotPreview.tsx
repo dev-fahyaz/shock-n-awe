@@ -5,10 +5,12 @@ import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { useEffect, useRef, useState } from 'react';
 
 import { cn } from 'components/ui/utils';
+import { BusinessCard } from './BusinessCard';
+import { DeviceFrame, type DeviceKind } from './DeviceFrame';
 import { itemKindForMedia, resolveMedia } from './media';
 import { ProviderFrame } from './ProviderFrame';
 import { isSafeUrl } from './schema';
-import type { LetterItem, ResolvedItem } from './types';
+import type { CardItem, LetterItem, ResolvedItem } from './types';
 import { letterText } from './letterTokens';
 import { WebsiteShot } from './websiteShot';
 
@@ -18,6 +20,14 @@ GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
  * Clipped miniature of the real content on a desk hotspot. Click handling
  * stays on the button/`<a>` — faces are `pointer-events-none`.
  */
+type Chrome = 'paper' | 'phone' | 'tablet' | 'monitor' | 'doc' | 'print' | 'plain';
+
+const DEVICE: Partial<Record<Chrome, DeviceKind>> = {
+  phone: 'phone',
+  tablet: 'tablet',
+  monitor: 'monitor',
+};
+
 export function HotspotPreview({
   item,
   showOutlines,
@@ -25,28 +35,77 @@ export function HotspotPreview({
   item: ResolvedItem;
   showOutlines?: boolean;
 }) {
+  const spec = faceFor(item);
+  const chrome = chromeFor(item, spec);
+  const stacked = spec?.type === 'letter';
+
+  const device = DEVICE[chrome];
+
   return (
     <span
       className={cn(
-        'scene-hotspot',
-        showOutlines &&
-          'bg-[var(--brand-accent)]/20 shadow-[0_0_0_1px_var(--brand-accent)]',
+        'scene-object',
+        `scene-object--${chrome}`,
+        showOutlines && 'scene-object--outline',
       )}
     >
-      <span className="absolute inset-0 overflow-hidden rounded-[inherit]">
-        <Face item={item} />
+      {stacked && (
+        <>
+          <span className="scene-sheet scene-sheet-b" aria-hidden />
+          <span className="scene-sheet scene-sheet-a" aria-hidden />
+        </>
+      )}
+      <span className={cn('scene-object-face', !device && `scene-object-face--${chrome}`)}>
+        {device ? (
+          <DeviceFrame kind={device} fill>
+            <Face spec={spec} item={item} />
+          </DeviceFrame>
+        ) : chrome === 'print' ? (
+          <span className="scene-object-mat">
+            <Face spec={spec} item={item} />
+          </span>
+        ) : (
+          <Face spec={spec} item={item} />
+        )}
       </span>
     </span>
   );
 }
 
-function Face({ item }: { item: ResolvedItem }) {
-  const spec = faceFor(item);
-  if (!spec) return null;
+function chromeFor(item: ResolvedItem, spec: FaceSpec | null): Chrome {
+  switch (spec?.type) {
+    case 'letter':
+    case 'card':
+      return 'paper';
+    case 'video':
+      return 'monitor';
+    case 'shot':
+      return 'tablet';
+    case 'pdf':
+      return 'doc';
+    case 'image':
+      return 'print';
+    case 'audio':
+      return 'phone';
+    default:
+      if (item.kind === 'audio') return 'phone';
+      if (item.kind === 'card') return 'paper';
+      if (item.kind === 'video') return 'monitor';
+      if (item.kind === 'embed' || item.kind === 'link') return 'tablet';
+      return 'plain';
+  }
+}
+
+function Face({ spec, item }: { spec: FaceSpec | null; item: ResolvedItem }) {
+  if (!spec) return <PlainMini label={item.label} />;
 
   switch (spec.type) {
     case 'letter':
       return <LetterMini item={spec.item} />;
+    case 'card':
+      return <CardMini item={spec.item} />;
+    case 'audio':
+      return <AudioMini />;
     case 'video':
       return (
         <VideoMini src={spec.src} embedUrl={spec.embedUrl} poster={spec.poster} />
@@ -76,6 +135,8 @@ function Face({ item }: { item: ResolvedItem }) {
 
 type FaceSpec =
   | { type: 'letter'; item: LetterItem }
+  | { type: 'card'; item: CardItem }
+  | { type: 'audio' }
   | { type: 'video'; src?: string; embedUrl?: string; poster?: string }
   | { type: 'pdf'; src: string }
   | { type: 'image'; src: string }
@@ -111,6 +172,10 @@ function faceFor(item: ResolvedItem): FaceSpec | null {
   switch (item.kind) {
     case 'letter':
       return { type: 'letter', item };
+    case 'card':
+      return { type: 'card', item };
+    case 'audio':
+      return { type: 'audio' };
     case 'video':
       return videoFace(item.src, item.poster);
     case 'pdf':
@@ -125,6 +190,7 @@ function faceFor(item: ResolvedItem): FaceSpec | null {
       const media = resolveMedia(item.src);
       const kind = item.as ?? itemKindForMedia(media);
       if (kind === 'video') return videoFace(media.url, item.poster ?? media.posterUrl);
+      if (kind === 'audio') return { type: 'audio' };
       if (kind === 'pdf' && isSafeUrl(media.url)) return { type: 'pdf', src: media.url };
       if (kind === 'image' && isSafeUrl(media.url)) return { type: 'image', src: media.url };
       if (kind === 'embed' || kind === 'link') return shotFace(media.embedUrl ?? media.url);
@@ -136,6 +202,46 @@ function faceFor(item: ResolvedItem): FaceSpec | null {
 }
 
 const LETTER_W = 420;
+
+function PlainMini({ label }: { label: string }) {
+  return (
+    <span className="pointer-events-none absolute inset-0 flex items-end p-[8%]">
+      <span className="truncate font-medium text-white/85" style={{ fontSize: '6.5cqw' }}>
+        {label}
+      </span>
+    </span>
+  );
+}
+
+function CardMini({ item }: { item: CardItem }) {
+  return (
+    <span className="pointer-events-none absolute inset-0">
+      <BusinessCard item={item} mini />
+    </span>
+  );
+}
+
+function AudioMini() {
+  const bars = [32, 58, 44, 86, 62, 100, 48, 74, 36, 90, 54, 70, 40, 82, 28, 64];
+  return (
+    <span className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[8%] bg-[#070b14] px-[10%]">
+      <span className="flex aspect-square h-[22%] items-center justify-center rounded-full bg-white">
+        <svg viewBox="0 0 12 14" className="ml-[8%] h-[42%] w-auto" aria-hidden>
+          <path d="M1 1.2 L10.5 7 L1 12.8 Z" fill="#12151a" />
+        </svg>
+      </span>
+      <span className="flex h-[20%] w-full items-center justify-between">
+        {bars.map((h, i) => (
+          <span
+            key={i}
+            className="w-[3.5%] rounded-full bg-[#7ec8ff]"
+            style={{ height: `${h}%` }}
+          />
+        ))}
+      </span>
+    </span>
+  );
+}
 
 function LetterMini({ item }: { item: LetterItem }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -222,17 +328,36 @@ function VideoMini({
     const el = ref.current;
     if (!el || !src) return;
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const apply = () => {
+    let dead = false;
+    const start = () => {
+      if (dead || mq.matches) {
+        el.pause();
+        return;
+      }
+      void el.play().catch(() => {});
+    };
+    start();
+    el.addEventListener('canplay', start);
+    mq.addEventListener('change', start);
+    const poll = window.setInterval(() => {
+      if (dead) return;
       if (mq.matches) {
         el.pause();
-      } else {
-        void el.play().catch(() => {});
+        return;
       }
-    };
-    apply();
-    mq.addEventListener('change', apply);
+      if (!el.paused) {
+        window.clearInterval(poll);
+        return;
+      }
+      start();
+    }, 500);
+    const stop = window.setTimeout(() => window.clearInterval(poll), 8000);
     return () => {
-      mq.removeEventListener('change', apply);
+      dead = true;
+      window.clearInterval(poll);
+      window.clearTimeout(stop);
+      el.removeEventListener('canplay', start);
+      mq.removeEventListener('change', start);
       el.pause();
     };
   }, [src]);
@@ -268,7 +393,8 @@ function VideoMini({
       muted
       loop
       playsInline
-      preload="metadata"
+      autoPlay
+      preload="auto"
       className="pointer-events-none absolute inset-0 size-full object-cover"
     />
   );

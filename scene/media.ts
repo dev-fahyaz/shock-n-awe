@@ -234,6 +234,9 @@ export function withEmbedPlayback(
       u.searchParams.set('playsinline', '1');
       u.searchParams.set('enablejsapi', '1');
       u.searchParams.set('rel', '0');
+      if (typeof window !== 'undefined') {
+        u.searchParams.set('origin', window.location.origin);
+      }
       if (muted) u.searchParams.set('mute', '1');
       if (!controls) u.searchParams.set('controls', '0');
       if (loop && id) {
@@ -269,10 +272,6 @@ export function withEmbedPlayback(
   } catch {
     return embedUrl;
   }
-}
-
-export function withEmbedAutoplay(embedUrl: string, muted = true): string {
-  return withEmbedPlayback(embedUrl, { muted, controls: true, loop: false });
 }
 
 /* ------------------------------------------------------------------ *
@@ -364,22 +363,5 @@ export function itemKindForMedia(media: ResolvedMedia) {
       return 'embed' as const;
     default:
       return 'link' as const;
-  }
-}
-
-/** Best-effort human label, used when a config omits one. */
-export function labelForMedia(media: ResolvedMedia): string {
-  if (media.filename) return decodeURIComponent(media.filename);
-  switch (media.provider) {
-    case 'youtube':
-    case 'vimeo':
-    case 'loom':
-    case 'wistia':
-    case 'dailymotion':
-      return 'Video';
-    case 'drive':
-      return 'Document';
-    default:
-      return 'Open';
   }
 }

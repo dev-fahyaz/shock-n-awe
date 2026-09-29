@@ -8,6 +8,7 @@ import { withEmbedPlayback } from './media';
 type YtPlayer = {
   mute: () => void;
   playVideo: () => void;
+  getPlayerState: () => number;
   destroy: () => void;
 };
 
@@ -86,28 +87,52 @@ export function ProviderFrame({
     // Desk miniature only. The modal uses a normal embed; YT.Player on a
     // zero-size dialog iframe leaves a blank frame.
     if (!youtube || !mini) return;
-    const iframe = hostRef.current?.querySelector('iframe');
-    if (!iframe) return;
+    const host = hostRef.current;
+    const iframe = host?.querySelector('iframe');
+    if (!host || !iframe) return;
     let dead = false;
+    let poll = 0;
+    const kick = (player: YtPlayer) => {
+      if (dead) return true;
+      try {
+        const state = player.getPlayerState();
+        if (state === 1 || state === 3) return true;
+        player.mute();
+        player.playVideo();
+      } catch {
+        /* player not ready yet */
+      }
+      return false;
+    };
     whenYtReady(() => {
       if (dead || !iframe.isConnected) return;
       const YT = (window as Window & { YT?: YtNamespace }).YT;
       if (!YT?.Player) return;
       try {
-        playerRef.current = new YT.Player(iframe, {
+        const player = new YT.Player(iframe, {
           events: {
             onReady: e => {
-              e.target.mute();
-              e.target.playVideo();
+              kick(e.target);
             },
           },
         });
+        playerRef.current = player;
+        const started = Date.now();
+        poll = window.setInterval(() => {
+          const current = playerRef.current;
+          if (!current || dead || Date.now() - started > 8000) {
+            window.clearInterval(poll);
+            return;
+          }
+          if (kick(current)) window.clearInterval(poll);
+        }, 500);
       } catch {
         /* query-param autoplay still on the iframe */
       }
     });
     return () => {
       dead = true;
+      window.clearInterval(poll);
       try {
         playerRef.current?.destroy();
       } catch {

@@ -4,9 +4,8 @@ import type { SceneConfig } from '../types';
  * The first scene: an executive desk aimed at financial-services security
  * leaders in New York.
  *
- * Hotspot percentages match the prop positions drawn in
- * `public/scene/stages/walnut-desk.svg`. Use `?edit=1` in development to drag
- * them and copy the updated numbers back here.
+ * The stage image is the desk surface only. Documents and screens are live
+ * items, and `placement.z` decides which one sits on top where they overlap.
  */
 export const nycDesk: SceneConfig = {
   id: 'nyc-financial-desk',
@@ -43,12 +42,10 @@ export const nycDesk: SceneConfig = {
       src: '/scene/stages/walnut-desk.svg',
       width: 2400,
       height: 1400,
-      alt:
-        'An executive desk viewed from above, with a monitor, phone, business ' +
-        'card, printed letter and several brochures laid out on a leather pad.',
+      alt: 'An overhead view of a walnut executive desk with a leather writing pad.',
     },
     theme: 'walnut',
-    // The drawn desk leaves the plaque blank for exactly this.
+    // The plaque itself is drawn by SceneNameplate, not the stage image.
     nameplate: { layout: 'freeform', x: 5, y: 4, w: 21, h: 9 },
   },
 
@@ -60,10 +57,10 @@ export const nycDesk: SceneConfig = {
   },
 
   items: [
-    // Monitor — the opening move.
+    // Monitor sits over the top of the letter.
     {
       ref: 'overviewVideo',
-      placement: { layout: 'freeform', x: 34, y: 5, w: 30, h: 37 },
+      placement: { layout: 'freeform', x: 32, y: 6, w: 32, h: 40, z: 4 },
     },
 
     // Business card, top right.
@@ -111,7 +108,7 @@ export const nycDesk: SceneConfig = {
         'If you would rather just talk, my direct line is on the card.',
       ].join('\n'),
       signature: { name: 'Adam Tanjil', title: 'CEO & Chairman, Aspire Tech' },
-      placement: { layout: 'freeform', x: 33, y: 47, w: 23, h: 45, rotate: -2 },
+      placement: { layout: 'freeform', x: 30, y: 34, w: 26, h: 50, rotate: -2, z: 1 },
     },
 
     // Buyer's guide, lower left.
@@ -120,18 +117,18 @@ export const nycDesk: SceneConfig = {
       placement: { layout: 'freeform', x: 5.5, y: 51, w: 19, h: 33, rotate: -6 },
     },
 
-    // Bottom row of folder documents.
+    // Bottom row of documents, fanned so each card covers the one beside it.
     {
       ref: 'handbook',
-      placement: { layout: 'freeform', x: 60, y: 64, w: 12, h: 25 },
+      placement: { layout: 'freeform', x: 58, y: 66, w: 14, h: 28, rotate: -8, z: 2 },
     },
     {
       ref: 'socBrochure',
-      placement: { layout: 'freeform', x: 73.5, y: 64, w: 12, h: 25 },
+      placement: { layout: 'freeform', x: 66, y: 64, w: 14, h: 28, rotate: -1, z: 3 },
     },
     {
       ref: 'criticalQuestions',
-      placement: { layout: 'freeform', x: 87, y: 64, w: 11, h: 25 },
+      placement: { layout: 'freeform', x: 74, y: 67, w: 14, h: 28, rotate: 7, z: 4 },
     },
   ],
 

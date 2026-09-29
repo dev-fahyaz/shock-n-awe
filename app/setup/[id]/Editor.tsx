@@ -704,6 +704,7 @@ function ItemsSection({
         <ItemFields
           sceneId={scene.id}
           item={item}
+          order={index}
           all={all}
           onChange={next => onUpdate(index, next)}
           onRemove={() => onRemove(index)}
@@ -716,12 +717,14 @@ function ItemsSection({
 function ItemFields({
   sceneId,
   item,
+  order,
   all,
   onChange,
   onRemove,
 }: {
   sceneId: string;
   item: Placed;
+  order: number;
   all: { id: string; label: string }[];
   onChange: (item: Placed) => void;
   onRemove: () => void;
@@ -734,7 +737,7 @@ function ItemFields({
     return (
       <div className="mt-4 space-y-3 rounded-xl border bg-card p-4">
         <p className="text-sm">Library item `{item.ref}` — placement only.</p>
-        <PlaceFields place={place} onChange={setPlace} />
+        <PlaceFields place={place} order={order} onChange={setPlace} />
         <Button variant="ghost" size="sm" onClick={onRemove}>
           Remove
         </Button>
@@ -780,7 +783,7 @@ function ItemFields({
           onChange={e => onChange({ ...item, hint: e.target.value || undefined })}
         />
       </div>
-      <PlaceFields place={place} onChange={setPlace} />
+      <PlaceFields place={place} order={order} onChange={setPlace} />
       {item.kind === 'letter' && (
         <>
           <div>
@@ -1164,9 +1167,12 @@ function SliderRow({
 
 function PlaceFields({
   place,
+  order,
   onChange,
 }: {
   place: FreeformPlacement;
+  /** Array index, used when this item has no explicit layer. */
+  order: number;
   onChange: (patch: Partial<FreeformPlacement>) => void;
 }) {
   return (
@@ -1216,6 +1222,16 @@ function PlaceFields({
         inputMin={-180}
         inputMax={180}
         onChange={rotate => onChange({ rotate })}
+      />
+      <SliderRow
+        label="Layer"
+        value={place.z ?? order}
+        min={0}
+        max={24}
+        reset={order}
+        inputMin={-20}
+        inputMax={50}
+        onChange={z => onChange({ z })}
       />
     </div>
   );
@@ -1270,7 +1286,7 @@ function StagePreview({
       </h2>
       <div
         ref={ref}
-        className="relative overflow-hidden rounded-xl bg-[#1b1410] shadow-2xl"
+        className="relative isolate overflow-hidden rounded-xl bg-[#1b1410] shadow-2xl"
         style={{ aspectRatio: bg ? `${bg.width} / ${bg.height}` : '12 / 7' }}
       >
         {bg && (
@@ -1298,6 +1314,7 @@ function StagePreview({
                 top: `${p.y}%`,
                 width: `${p.w}%`,
                 height: `${p.h}%`,
+                zIndex: (p.z ?? i) + (selected === key ? 40 : 0),
                 transform: p.rotate ? `rotate(${p.rotate}deg)` : undefined,
               }}
               className={cn(

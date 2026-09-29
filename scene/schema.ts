@@ -107,6 +107,7 @@ const freeformPlacement = z.object({
   w: z.number().min(0.5).max(120),
   h: z.number().min(0.5).max(120),
   rotate: z.number().min(-180).max(180).optional(),
+  z: z.number().int().min(-20).max(50).optional(),
   shape: z.enum(['rect', 'ellipse']).optional(),
 });
 

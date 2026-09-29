@@ -18,46 +18,35 @@ import type { LayoutStrategy, StageProps } from './types';
 
 function FreeformStage({ config, children }: StageProps) {
   const bg = config.stage.background;
-
-  if (!bg) {
-    return (
-      <div className="scene-stage relative w-full" style={{ aspectRatio: '12 / 7' }}>
-        {children}
-      </div>
-    );
-  }
+  const width = bg?.width ?? 12;
+  const height = bg?.height ?? 7;
 
   return (
     <div
       className={cn(
-        'scene-stage relative w-full select-none overflow-hidden rounded-2xl',
-        'bg-[#1b1410]',
+        'scene-stage relative isolate w-full select-none overflow-hidden bg-[#1b1410]',
       )}
       style={{
-        aspectRatio: `${bg.width} / ${bg.height}`,
+        aspectRatio: `${width} / ${height}`,
         viewTransitionName: `scene-${config.id}`,
-        boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px -24px rgba(0,0,0,0.65), 0 0 80px -20px color-mix(in srgb, var(--brand-accent) 28%, transparent)',
       } as CSSProperties}
     >
-      {/* Plain img: stage art is a Supabase (or other) URL. next/image 500s
-          in production unless every host is listed at build time. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={bg.src}
-        alt={bg.alt}
-        className="pointer-events-none absolute inset-0 size-full object-cover"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/35"
-      />
+      {bg && (
+        /* Plain img: stage art is a Supabase (or other) URL. next/image 500s
+           in production unless every host is listed at build time. */
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={bg.src}
+          alt={bg.alt}
+          className="pointer-events-none absolute inset-0 size-full object-cover"
+        />
+      )}
       {children}
     </div>
   );
 }
 
-function position(placement: Placement): CSSProperties {
+function position(placement: Placement, index = 0): CSSProperties {
   if (placement.layout !== 'freeform') return {};
 
   return {
@@ -66,6 +55,7 @@ function position(placement: Placement): CSSProperties {
     top: `${placement.y}%`,
     width: `${placement.w}%`,
     height: `${placement.h}%`,
+    zIndex: placement.z ?? index,
     transform: placement.rotate ? `rotate(${placement.rotate}deg)` : undefined,
     borderRadius: placement.shape === 'ellipse' ? '50%' : undefined,
   };

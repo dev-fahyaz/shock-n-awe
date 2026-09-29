@@ -61,6 +61,11 @@ export interface FreeformPlacement {
   w: number;
   h: number;
   rotate?: number;
+  /**
+   * Paint order. Higher sits on top of a lower item where they overlap.
+   * Omitted means array order.
+   */
+  z?: number;
   shape?: 'rect' | 'ellipse';
 }
 
