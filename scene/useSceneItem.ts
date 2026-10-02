@@ -10,6 +10,8 @@ export interface SceneContextValue {
   items: ResolvedItem[];
   trail: TrailNode[];
   activeItem: ResolvedItem | null;
+  /** Set when opened from Setup with `?setup=`; Back returns there. */
+  setupId: string | null;
   open: (itemId: string) => void;
   close: () => void;
   /** Resolves a scene id to a URL on the current brand, or null if unreachable. */

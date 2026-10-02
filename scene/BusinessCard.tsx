@@ -5,7 +5,8 @@ import type { CardItem } from './types';
 
 /**
  * A landscape calling card. `mini` scales type to the hotspot; the modal uses
- * the same arrangement at a readable size.
+ * the same arrangement at a readable size. Everything shown must fit inside
+ * the card bounds.
  */
 export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: boolean }) {
   const { person, social, vcard } = item;
@@ -15,19 +16,19 @@ export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: bo
   return (
     <article
       className={cn(
-        'flex h-full w-full bg-[#f4f0e6] text-[#1a1c20]',
-        mini ? 'items-stretch' : 'overflow-hidden rounded-md shadow-[0_24px_50px_-20px_rgba(0,0,0,0.55)]',
+        'flex h-full w-full overflow-hidden bg-[#f4f0e6] text-[#1a1c20]',
+        !mini && 'rounded-md shadow-[0_24px_50px_-20px_rgba(0,0,0,0.55)]',
       )}
     >
       <div
-        className="w-[7px] shrink-0"
+        className={cn('shrink-0', mini ? 'w-[4px]' : 'w-[6px]')}
         style={{ background: 'linear-gradient(180deg, #1d4e89, #163a66)' }}
         aria-hidden
       />
       <div
         className={cn(
-          'flex min-w-0 flex-1 items-center',
-          mini ? 'gap-[5%] px-[5%] py-[6%]' : 'gap-6 px-7 py-6',
+          'flex min-h-0 min-w-0 flex-1 items-center',
+          mini ? 'gap-[3.5%] px-[4%] py-[4%]' : 'gap-4 px-5 py-4',
         )}
       >
         {person.photo && (
@@ -35,32 +36,40 @@ export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: bo
           <img
             src={person.photo}
             alt=""
+            loading="lazy"
+            decoding="async"
             className={cn(
               'shrink-0 rounded-full object-cover',
-              mini ? 'aspect-square h-[62%]' : 'size-24 border border-black/10',
+              mini ? 'aspect-square h-[48%]' : 'size-16 border border-black/10',
             )}
           />
         )}
-        <div className="min-w-0 flex-1">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center overflow-hidden">
           <p
-            className={cn('truncate font-semibold leading-tight', !mini && 'text-2xl')}
-            style={mini ? { fontSize: '8cqw' } : undefined}
+            className={cn(
+              'truncate font-semibold leading-tight',
+              !mini && 'text-base',
+            )}
+            style={mini ? { fontSize: '5.2cqw' } : undefined}
           >
             {person.name}
           </p>
           <p
-            className={cn('truncate text-[#5c6570]', !mini && 'mt-1 text-sm')}
-            style={mini ? { fontSize: '4.6cqw', marginTop: '0.35em' } : undefined}
+            className={cn('truncate text-[#5c6570]', !mini && 'mt-0.5 text-xs')}
+            style={mini ? { fontSize: '3.2cqw', marginTop: '0.2em' } : undefined}
           >
             {person.title}
           </p>
           <div
-            className={cn('bg-[#c4a15a]', mini ? 'my-[0.7em] h-px w-[28%]' : 'my-3 h-px w-16')}
+            className={cn('bg-[#c4a15a]', mini ? 'my-[0.45em] h-px w-[24%]' : 'my-2 h-px w-12')}
             aria-hidden
           />
           <div
-            className={cn('text-[#3c4450]', mini ? 'space-y-[0.2em]' : 'space-y-1 text-sm')}
-            style={mini ? { fontSize: '3.8cqw' } : undefined}
+            className={cn(
+              'min-w-0 overflow-hidden text-[#3c4450]',
+              mini ? 'space-y-[0.12em]' : 'space-y-0.5 text-xs leading-snug',
+            )}
+            style={mini ? { fontSize: '2.7cqw' } : undefined}
           >
             {(mini ? [phone].filter(Boolean) : person.phones ?? []).map(p =>
               p ? (
@@ -89,7 +98,9 @@ export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: bo
                 )}
               </p>
             )}
-            {!mini && person.address && <p>{person.address}</p>}
+            {!mini && person.address && (
+              <p className="line-clamp-2 break-words">{person.address}</p>
+            )}
             {site && (
               <p className="truncate">
                 {mini || !person.website ? (
@@ -108,14 +119,14 @@ export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: bo
             )}
           </div>
           {!mini && social && social.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-x-2 gap-y-0.5">
               {social.map(s => (
                 <a
                   key={s.href}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs capitalize text-[#1d4e89] hover:underline"
+                  className="text-[11px] capitalize text-[#1d4e89] hover:underline"
                 >
                   {s.network}
                 </a>
@@ -126,9 +137,9 @@ export function BusinessCard({ item, mini = false }: { item: CardItem; mini?: bo
             <a
               href={vcard}
               download
-              className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-[#1d4e89] hover:underline"
+              className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-[#1d4e89] hover:underline"
             >
-              <Download className="size-3.5" />
+              <Download className="size-3" />
               Save contact
             </a>
           )}

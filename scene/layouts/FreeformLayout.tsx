@@ -38,6 +38,8 @@ function FreeformStage({ config, children }: StageProps) {
         <img
           src={bg.src}
           alt={bg.alt}
+          fetchPriority="high"
+          decoding="async"
           className="pointer-events-none absolute inset-0 size-full object-cover"
         />
       )}

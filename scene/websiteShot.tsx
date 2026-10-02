@@ -54,6 +54,8 @@ export function WebsiteShot({
     <img
       src={shotUrl(href, width, bust || undefined)}
       alt={label}
+      loading="lazy"
+      decoding="async"
       className={cn('size-full object-cover object-top', className)}
       onLoad={e => {
         const { naturalWidth: w, naturalHeight: h } = e.currentTarget;

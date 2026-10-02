@@ -2,9 +2,7 @@
 
 import { ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
-import { setupReturnId } from './setupReturn';
 import { useScene } from './useSceneItem';
 
 function sceneHref(slug: string, setupId: string | null) {
@@ -16,14 +14,9 @@ function sceneHref(slug: string, setupId: string | null) {
  * this renders nothing — they cannot walk back to the catalog or Setup.
  */
 export function SceneBreadcrumb({ operator }: { operator: boolean }) {
-  const { trail } = useScene();
+  const { trail, setupId } = useScene();
   const nested = trail.length >= 2;
   const parent = nested ? trail[trail.length - 2] : null;
-  const [setupId, setSetupId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSetupId(setupReturnId());
-  }, []);
 
   if (!operator) return null;
 

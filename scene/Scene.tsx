@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { layoutFor } from './layouts/registry';
@@ -7,12 +8,17 @@ import { SceneBanner } from './SceneBanner';
 import { SceneBreadcrumb } from './SceneBreadcrumb';
 import { SceneItemButton } from './SceneItemButton';
 import { SceneMobileList } from './SceneMobileList';
-import { SceneModal } from './SceneModal';
 import { SceneNameplate } from './SceneNameplate';
+import { setupReturnId } from './setupReturn';
 import { setRecipientId, track } from './track';
 import type { ResolvedItem, SceneConfig, SiteKey, TrailNode } from './types';
 import { SceneContext } from './useSceneItem';
 import { opensModal } from './viewers/registry';
+
+const SceneModal = dynamic(
+  () => import('./SceneModal').then(m => ({ default: m.SceneModal })),
+  { ssr: false },
+);
 
 /**
  * The scene shell.
@@ -65,7 +71,7 @@ export function Scene({
    */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setSetupId(params.get('setup')?.trim() || null);
+    setSetupId(setupReturnId());
 
     const recipient = params.get('r');
     if (recipient) setRecipientId(recipient);
@@ -89,13 +95,17 @@ export function Scene({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Keep `?open=` in the URL so a specific document can be shared. */
-  const syncUrl = useCallback((itemId: string | null) => {
-    const url = new URL(window.location.href);
-    if (itemId) url.searchParams.set('open', itemId);
-    else url.searchParams.delete('open');
-    window.history.replaceState(null, '', url.toString());
-  }, []);
+  /** Keep `?open=` (and `?setup=` when present) so Back still returns to Setup. */
+  const syncUrl = useCallback(
+    (itemId: string | null) => {
+      const url = new URL(window.location.href);
+      if (itemId) url.searchParams.set('open', itemId);
+      else url.searchParams.delete('open');
+      if (setupId) url.searchParams.set('setup', setupId);
+      window.history.replaceState(null, '', url.toString());
+    },
+    [setupId],
+  );
 
   const open = useCallback(
     (itemId: string) => {
@@ -132,11 +142,12 @@ export function Scene({
       items,
       trail,
       activeItem,
+      setupId,
       open,
       close,
       hrefForScene,
     }),
-    [config, site, items, trail, activeItem, open, close, hrefForScene],
+    [config, site, items, trail, activeItem, setupId, open, close, hrefForScene],
   );
 
   const { Stage } = strategy;

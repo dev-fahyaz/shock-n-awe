@@ -1,6 +1,5 @@
 'use client';
 
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { useEffect, useRef, useState } from 'react';
 
@@ -12,9 +11,8 @@ import { ProviderFrame } from './ProviderFrame';
 import { isSafeUrl } from './schema';
 import type { CardItem, LetterItem, ResolvedItem } from './types';
 import { letterText } from './letterTokens';
+import { useNearViewport } from './useNearViewport';
 import { WebsiteShot } from './websiteShot';
-
-GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 /**
  * Clipped miniature of the real content on a desk hotspot. Click handling
@@ -122,14 +120,7 @@ function Face({ spec, item }: { spec: FaceSpec | null; item: ResolvedItem }) {
         />
       );
     case 'shot':
-      return (
-        <WebsiteShot
-          href={spec.href}
-          label=""
-          width={640}
-          className="pointer-events-none absolute inset-0"
-        />
-      );
+      return <ShotMini href={spec.href} />;
   }
 }
 
@@ -313,6 +304,22 @@ function LetterMini({ item }: { item: LetterItem }) {
   );
 }
 
+function ShotMini({ href }: { href: string }) {
+  const { ref, near } = useNearViewport<HTMLSpanElement>();
+  return (
+    <span ref={ref} className="pointer-events-none absolute inset-0 bg-[#0c0e12]">
+      {near && (
+        <WebsiteShot
+          href={href}
+          label=""
+          width={640}
+          className="pointer-events-none absolute inset-0"
+        />
+      )}
+    </span>
+  );
+}
+
 function VideoMini({
   src,
   embedUrl,
@@ -322,11 +329,13 @@ function VideoMini({
   embedUrl?: string;
   poster?: string;
 }) {
-  const ref = useRef<HTMLVideoElement>(null);
+  const { ref, near } = useNearViewport<HTMLSpanElement>();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el || !src) return;
+    if (!near || !src) return;
+    const el = videoRef.current;
+    if (!el) return;
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     let dead = false;
     const start = () => {
@@ -360,48 +369,72 @@ function VideoMini({
       mq.removeEventListener('change', start);
       el.pause();
     };
-  }, [src]);
+  }, [near, src]);
 
   if (embedUrl) {
     return (
-      <ProviderFrame
-        embedUrl={embedUrl}
-        title=""
-        mini
-        className="pointer-events-none absolute inset-0 size-full overflow-hidden"
-      />
+      <span ref={ref} className="pointer-events-none absolute inset-0 bg-black">
+        {near ? (
+          <ProviderFrame
+            embedUrl={embedUrl}
+            title=""
+            mini
+            className="pointer-events-none absolute inset-0 size-full overflow-hidden"
+          />
+        ) : poster ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={poster}
+            alt=""
+            className="pointer-events-none absolute inset-0 size-full object-cover"
+          />
+        ) : null}
+      </span>
     );
   }
 
   if (!src) {
-    if (!poster) return null;
+    if (!poster) return <span ref={ref} className="pointer-events-none absolute inset-0 bg-black" />;
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={poster}
-        alt=""
-        className="pointer-events-none absolute inset-0 size-full object-cover"
-      />
+      <span ref={ref} className="pointer-events-none absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={poster}
+          alt=""
+          className="pointer-events-none absolute inset-0 size-full object-cover"
+        />
+      </span>
     );
   }
 
   return (
-    <video
-      ref={ref}
-      src={src}
-      poster={poster}
-      muted
-      loop
-      playsInline
-      autoPlay
-      preload="auto"
-      className="pointer-events-none absolute inset-0 size-full object-cover"
-    />
+    <span ref={ref} className="pointer-events-none absolute inset-0 bg-black">
+      {near ? (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="metadata"
+          className="pointer-events-none absolute inset-0 size-full object-cover"
+        />
+      ) : poster ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={poster}
+          alt=""
+          className="pointer-events-none absolute inset-0 size-full object-cover"
+        />
+      ) : null}
+    </span>
   );
 }
 
 function PdfMini({ src }: { src: string }) {
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const { ref: wrapRef, near } = useNearViewport<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const taskRef = useRef<RenderTask | null>(null);
   const [width, setWidth] = useState(0);
@@ -428,32 +461,38 @@ function PdfMini({ src }: { src: string }) {
   }, [src]);
 
   useEffect(() => {
-    if (!src) return;
+    if (!near || !src) return;
     let cancelled = false;
     let doc: PDFDocumentProxy | null = null;
+    let destroyLoading: (() => void) | null = null;
     setPdf(null);
 
-    const loading = getDocument({ url: src, withCredentials: false });
-    loading.promise.then(
-      loaded => {
-        if (cancelled) {
-          loaded.destroy();
-          return;
-        }
-        doc = loaded;
-        setPdf(loaded);
-      },
-      () => {
-        /* missing or unreadable */
-      },
-    );
+    void import('pdfjs-dist').then(pdfjs => {
+      if (cancelled) return;
+      pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+      const loading = pdfjs.getDocument({ url: src, withCredentials: false });
+      destroyLoading = () => loading.destroy();
+      loading.promise.then(
+        loaded => {
+          if (cancelled) {
+            loaded.destroy();
+            return;
+          }
+          doc = loaded;
+          setPdf(loaded);
+        },
+        () => {
+          /* missing or unreadable */
+        },
+      );
+    });
 
     return () => {
       cancelled = true;
-      loading.destroy();
+      destroyLoading?.();
       doc?.destroy();
     };
-  }, [src]);
+  }, [near, src]);
 
   useEffect(() => {
     if (!pdf || width <= 0) return;
@@ -503,7 +542,7 @@ function PdfMini({ src }: { src: string }) {
 
   return (
     <div ref={wrapRef} className="pointer-events-none absolute inset-0 overflow-hidden bg-white">
-      <canvas ref={canvasRef} className="block w-full bg-white" />
+      {near && <canvas ref={canvasRef} className="block w-full bg-white" />}
     </div>
   );
 }
