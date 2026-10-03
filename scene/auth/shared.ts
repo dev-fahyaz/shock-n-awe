@@ -77,7 +77,20 @@ export function createMiddlewareAuth(req: NextRequest, res: NextResponse) {
 }
 
 export function safeNextPath(value: string | null | undefined): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/setup';
-  if (value.startsWith('/login')) return '/setup';
-  return value;
+  const raw = value?.trim() ?? '';
+  if (!raw) return '/setup';
+
+  // Hub sometimes sends an absolute same-origin URL; keep only the path.
+  if (/^https?:\/\//i.test(raw)) {
+    try {
+      const abs = new URL(raw);
+      return safeNextPath(`${abs.pathname}${abs.search}${abs.hash}`);
+    } catch {
+      return '/setup';
+    }
+  }
+
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/setup';
+  if (raw.startsWith('/login')) return '/setup';
+  return raw;
 }

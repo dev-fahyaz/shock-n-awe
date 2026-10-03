@@ -2,7 +2,7 @@
 
 A config-driven engine for **interactive scenes** (desk, board, office). It is a standalone Next.js app. SAT ([securityawarenesstraining.ai](https://www.securityawarenesstraining.ai)) and Aspire ([aspiretss.com](https://aspiretss.com)) stay their own codebases; they ask a fetch helper whether a slug is live, then iframe this engine.
 
-How to use Setup: [`docs/ui.md`](docs/ui.md). Hub login channel: [`docs/login-channel.md`](docs/login-channel.md). Engine internals: [`docs/Shock_and_Awe_Technical_Spec.md`](docs/Shock_and_Awe_Technical_Spec.md).
+How to use Setup: [`docs/ui.md`](docs/ui.md). Hub login: [`docs/login-channel.md`](docs/login-channel.md). Logout sync: [`docs/LogOut.md`](docs/LogOut.md). Engine internals: [`docs/Shock_and_Awe_Technical_Spec.md`](docs/Shock_and_Awe_Technical_Spec.md).
 
 ---
 
@@ -44,8 +44,8 @@ Optional:
 
 | Variable | Purpose |
 |---|---|
-| `HANDOFF_SECRET` | Hub server mint for `POST /api/auth/handoff` |
-| `DASHBOARD_URL` | Hub URL for **Return to dashboard** |
+| `HANDOFF_SECRET` | Hub server mint for `POST /api/auth/handoff` and `POST /api/auth/logout/handoff` |
+| `DASHBOARD_URL` | Hub URL for **Return to dashboard** and hub logout after Sign out |
 | `NEXT_PUBLIC_GTM_ASAT` / `NEXT_PUBLIC_GTM_ASPIRE` | GTM containers. An unset id must render no tag |
 | `NEXT_PUBLIC_FORCE_SITE` | `asat` \| `aspire` — override host resolution locally |
 | `SKIP_ENV_CHECK=1` | Allow a production build with no analytics IDs |
@@ -97,7 +97,7 @@ docker compose up -d --build    # publishes 5000:5000
 
 The hub must not put JWTs in the page. It mints a one-time code on the server, then redirects the browser. Full contract: [`docs/login-channel.md`](docs/login-channel.md).
 
-`POST /api/auth/login` still accepts `{ email, password }` or `{ access_token, refresh_token }` (tests / fallback). The user must have `app_users.role = admin`. Set `DASHBOARD_URL` to the hub origin so Setup shows **Return to dashboard**.
+`POST /api/auth/login` still accepts `{ email, password }` or `{ access_token, refresh_token }` (tests / fallback). The user must have `app_users.role = admin`. Set `DASHBOARD_URL` to the hub origin so Setup shows **Return to dashboard** and Sign out can return to the hub’s logout fan-out.
 
 ```bash
 npm run test:login -- --email you@example.com --password secret
@@ -165,6 +165,7 @@ Shock-and-Awe/
 ├── supabase/schema.sql       tables, RPC, buckets
 ├── docs/ui.md                how to use Setup
 ├── docs/login-channel.md     hub one-time code login
+├── docs/LogOut.md            logout sync (hub + connected apps)
 ├── scripts/                  reserved slugs, validate, test-login
 └── public/scene/stages/      optional local stage art for compiled examples
 ```

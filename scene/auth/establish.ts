@@ -49,12 +49,12 @@ export function applySink(res: NextResponse, sink: CookieSink) {
 }
 
 /**
- * Relative Location so the browser stays on the host it used.
- * An absolute URL built from the incoming request advertises 0.0.0.0 inside Docker.
+ * Set Location to a relative path (preferred) or absolute URL (hub `next`).
+ * Prefer relative paths for this origin so Docker internal hosts never leak.
  */
-export function redirectPath(path: string, status: 302 | 303) {
+export function redirectPath(target: string, status: 302 | 303) {
   const res = new NextResponse(null, { status });
-  res.headers.set('Location', path);
+  res.headers.set('Location', target);
   return res;
 }
 
@@ -86,27 +86,19 @@ export type EstablishResult =
 
 /** setSession + admin check. Writes auth cookies into the sink. */
 export async function establishAdminSession(tokens: HandoffTokens): Promise<EstablishResult> {
+  const verified = await adminUserForTokens(tokens);
+  if (!verified.ok) {
+    return { ok: false, status: verified.status, error: verified.error, sink: newCookieSink() };
+  }
+
   const sink = newCookieSink();
   const supabase = createRouteSupabase(sink);
-  const { data, error } = await supabase.auth.getUser(tokens.access_token);
-  if (error || !data.user) {
-    return {
-      ok: false,
-      status: 401,
-      error: `Invalid access token. ${HANDOFF_HINT}`,
-      sink,
-    };
-  }
   const { error: sessError } = await supabase.auth.setSession({
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token,
   });
   if (sessError) {
     return { ok: false, status: 401, error: 'Invalid session tokens', sink };
-  }
-  if (!(await adminRoleFor(data.user.id))) {
-    await supabase.auth.signOut();
-    return { ok: false, status: 403, error: 'Not an admin', sink };
   }
   return { ok: true, sink };
 }

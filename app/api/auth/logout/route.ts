@@ -1,41 +1,15 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-import { applyAuthCookies, authPublishableKey, authUrl } from 'scene/auth/shared';
+import { clearAuthSession } from 'scene/auth/clearSession';
+import { hubLogoutUrl } from 'scene/auth/dashboard';
+import { applySink } from 'scene/auth/establish';
 
+/** Clear this origin’s session. `{ next }` is hub `/logout` when DASHBOARD_URL is set. */
 export async function POST() {
-  const url = authUrl();
-  const publishable = authPublishableKey();
-  if (!url || !publishable) {
-    return NextResponse.redirect(new URL('/login', process.env.SCENE_ENGINE_URL || 'http://localhost:5000'));
+  const next = hubLogoutUrl() ?? '/login';
+  const sink = await clearAuthSession();
+  if (!sink) {
+    return NextResponse.json({ ok: true, next });
   }
-
-  const store = cookies();
-  const pending: {
-    name: string;
-    value: string;
-    options?: Record<string, unknown>;
-  }[] = [];
-  let extraHeaders: Record<string, string> = {};
-
-  const supabase = createServerClient(url, publishable, {
-    cookies: {
-      getAll() {
-        return store.getAll();
-      },
-      setAll(toSet, headers) {
-        toSet.forEach(({ name, value, options }) => {
-          pending.push({ name, value, options: options as Record<string, unknown> });
-        });
-        extraHeaders = headers ?? extraHeaders;
-      },
-    },
-  });
-
-  await supabase.auth.signOut();
-
-  const res = NextResponse.json({ ok: true });
-  applyAuthCookies(res, pending, extraHeaders);
-  return res;
+  return applySink(NextResponse.json({ ok: true, next }), sink);
 }

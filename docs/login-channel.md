@@ -36,7 +36,7 @@ Content-Type: application/json
 }
 ```
 
-`200`: `{ "ok": true, "code": "<string>", "expires_in": 60 }` — use `code` immediately in the redirect.
+`200`: `{ "ok": true, "code": "<string>", "expires_in": 60 }` — use `code` immediately in the redirect. Codes are held in the Shock and Awe process for ~60s (one-use, with a short replay window for duplicate browser hits).
 
 | Status | What to do |
 |---|---|
@@ -51,7 +51,9 @@ Content-Type: application/json
 {SCENE_ENGINE_URL}/api/auth/consume?code=<code>&next=/setup
 ```
 
-`next=/setup` is the usual landing. If the code is not accepted, they will see Shock and Awe’s sign-in page.
+`next=/setup` is the usual landing. If the code is not accepted, they will see Shock and Awe’s sign-in page. Prefer a relative path (`/setup`); an absolute same-origin URL is accepted and reduced to its path.
+
+Consume is written to tolerate a duplicate browser hit on the same code for a few seconds (common when the first open races). Still: **redirect the browser once** to the consume URL — do not `fetch` it from your server or open it twice.
 
 ## Example (your server route)
 
@@ -83,3 +85,9 @@ dest.searchParams.set('code', body.code);
 dest.searchParams.set('next', '/setup');
 return Response.redirect(dest.toString(), 302);
 ```
+
+## Logout sync
+
+Shock and Awe keeps its own cookies after login. Hub sign-out does not clear them unless you run the logout fan-out (mint logout handoff → browser hits consume). When Sign out starts here, this app clears itself then opens the hub SPA `/logout`.
+
+Full contract for hub + any connected app: [`LogOut.md`](LogOut.md).
